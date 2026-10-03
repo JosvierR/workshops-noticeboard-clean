@@ -69,4 +69,11 @@ aws s3 sync frontend/dist/ "s3://${S3_BUCKET_NAME}/" --delete
 
 ## Verification runs
 
-Recorded after GitHub reports `conclusion=success`.
+Both runs were push events on `tier2-ci-deploy`. GitHub reported `conclusion=success` for each.
+
+| Run | ID | URL | Conclusion |
+| --- | --- | --- | --- |
+| First, workflow activation | `37163154135` | https://github.com/JosvierR/workshops/actions/runs/37163154135 | success |
+| Second, footer proof | `37163237807` | https://github.com/JosvierR/workshops/actions/runs/37163237807 | success |
+
+The second run rebuilt the frontend after the "Deployed with GitHub Actions" footer was pushed. The live S3 JavaScript contains that text. Lambda `LastModified` moved with each code update, and both runs passed the API smoke test.
