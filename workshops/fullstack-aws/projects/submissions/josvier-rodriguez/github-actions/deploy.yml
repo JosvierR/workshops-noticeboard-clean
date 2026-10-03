@@ -1,0 +1,19 @@
+# Reference workflow only.
+# The assignment says the final upstream PR must not modify repository-level
+# .github files unless explicitly authorized by the instructor.
+#
+# After Tier 1 AWS resources exist, this file will be expanded into the real
+# Tier 2 deployment workflow and, if authorized, copied to .github/workflows
+# on the fork without including that root-level change in the final PR.
+
+name: NoticeBoard deploy reference
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deployment-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reference only
+        run: echo "Activate deployment only after Tier 1 resources exist."
