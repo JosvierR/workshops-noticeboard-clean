@@ -29,6 +29,29 @@ Tier 1 allows public `s3:GetObject` on the website bucket so the browser can loa
 
 The Lambda reads `MONGO_URI` and `MONGO_DB_NAME` from its environment. Those values are not stored in source control.
 
+## CI/CD
+
+GitHub Actions on `tier2-ci-deploy` ships the same runtime. It does not change the request path below.
+
+```text
+GitHub push
+     |
+     v
+GitHub Actions
+     |
+     +--> pytest
+     |
+     +--> React build
+     |
+     +--> Lambda package
+     |
+     +--> update Lambda code
+     |
+     +--> sync S3
+     |
+     +--> API smoke test
+```
+
 ## Final target
 
 ```text

@@ -1,19 +1,284 @@
-# Reference workflow only.
-# The assignment says the final upstream PR must not modify repository-level
-# .github files unless explicitly authorized by the instructor.
+# NoticeBoard Tier 2 deployment workflow.
+# This file is the submission reference. The active copy lives only on
+# branch tier2-ci-deploy at .github/workflows/noticeboard-deploy.yml.
+# Do not merge that root workflow back into challenge/notice-board.
+# The final upstream PR must contain only this submission directory.
 #
-# After Tier 1 AWS resources exist, this file will be expanded into the real
-# Tier 2 deployment workflow and, if authorized, copied to .github/workflows
-# on the fork without including that root-level change in the final PR.
+# Tier 2 deploys application code and frontend files only. It does not
+# change Lambda environment variables, API Gateway, Atlas, or the bucket policy.
 
-name: NoticeBoard deploy reference
+name: NoticeBoard deploy
 
 on:
+  push:
+    branches:
+      - tier2-ci-deploy
+    paths:
+      - workshops/fullstack-aws/projects/submissions/josvier-rodriguez/**
+      - .github/workflows/noticeboard-deploy.yml
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: noticeboard-tier2-deploy
+  cancel-in-progress: false
+
+env:
+  PROJECT_DIR: workshops/fullstack-aws/projects/submissions/josvier-rodriguez
+  EXPECTED_AWS_ACCOUNT: "279249498881"
+
 jobs:
-  deployment-reference:
+  quality:
+    name: Test and build
     runs-on: ubuntu-latest
     steps:
-      - name: Reference only
-        run: echo "Activate deployment only after Tier 1 resources exist."
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend dependencies
+        working-directory: ${{ env.PROJECT_DIR }}/backend
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run backend tests
+        working-directory: ${{ env.PROJECT_DIR }}/backend
+        run: python -m pytest -v
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install and build frontend
+        working-directory: ${{ env.PROJECT_DIR }}/frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          test -n "$VITE_API_URL"
+          npm ci
+          npm run build
+          test -f dist/index.html
+
+      - name: Scan production build
+        working-directory: ${{ env.PROJECT_DIR }}/frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+
+          root = Path("dist")
+          chunks = []
+          for path in root.rglob("*"):
+              if path.is_file():
+                  chunks.append(path.read_text(encoding="utf-8", errors="ignore"))
+          text = "\n".join(chunks)
+          if "localhost:8000" in text:
+              raise SystemExit("localhost:8000 found in frontend build")
+          api_url = os.environ["VITE_API_URL"]
+          if api_url not in text:
+              raise SystemExit("configured API URL is missing from frontend build")
+          print("build-scan=pass")
+          PY
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.PROJECT_DIR }}/frontend/dist
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy and verify
+    runs-on: ubuntu-latest
+    needs: quality
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      LAMBDA_FUNCTION_NAME: ${{ vars.LAMBDA_FUNCTION_NAME }}
+      S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
+      VITE_API_URL: ${{ vars.VITE_API_URL }}
+      S3_WEBSITE_URL: ${{ vars.S3_WEBSITE_URL }}
+      API_BASE_URL: ${{ vars.VITE_API_URL }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: ${{ env.PROJECT_DIR }}/frontend/dist
+
+      - name: Package Lambda for Linux
+        run: |
+          set -euo pipefail
+          pkg="/tmp/noticeboard-lambda/package"
+          rm -rf /tmp/noticeboard-lambda
+          mkdir -p "$pkg"
+          python -m pip install -r "$PROJECT_DIR/backend/requirements.txt" -t "$pkg"
+          cp "$PROJECT_DIR/backend/lambda_function.py" "$pkg/lambda_function.py"
+          cp -a "$PROJECT_DIR/backend/app" "$pkg/app"
+          find "$pkg" -type d -name __pycache__ -prune -exec rm -rf {} +
+          find "$pkg" -type f -name '*.pyc' -delete
+          python - <<'PY'
+          import zipfile
+          from pathlib import Path
+
+          root = Path("/tmp/noticeboard-lambda/package")
+          required = ["lambda_function.py", "app", "pymongo", "bson", "dns", "gridfs"]
+          present = {child.name for child in root.iterdir()}
+          missing = [name for name in required if name not in present]
+          if missing:
+              raise SystemExit(f"Lambda package is missing: {', '.join(missing)}")
+
+          forbidden_prefixes = ("fastapi", "uvicorn", "httpx", "pytest")
+          for child in root.iterdir():
+              lowered = child.name.lower()
+              if lowered in {"local_app.py", "dockerfile"} or lowered.startswith(forbidden_prefixes):
+                  raise SystemExit(f"Forbidden package entry: {child.name}")
+          for path in root.rglob("local_app.py"):
+              raise SystemExit(f"Forbidden file: {path}")
+
+          archive = Path("/tmp/noticeboard-lambda/noticeboard-lambda.zip")
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as handle:
+              for path in root.rglob("*"):
+                  if path.is_file():
+                      handle.write(path, path.relative_to(root).as_posix())
+          with zipfile.ZipFile(archive) as handle:
+              names = handle.namelist()
+          if "lambda_function.py" not in names:
+              raise SystemExit("lambda_function.py is not at the zip root")
+          if any(name.startswith("backend/") for name in names):
+              raise SystemExit("zip contains a backend/ prefix")
+          print(f"zip-bytes={archive.stat().st_size}")
+          print("zip-root-handler=yes")
+          PY
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Guard AWS account and region
+        run: |
+          set -euo pipefail
+          test -n "$AWS_REGION"
+          test -n "$LAMBDA_FUNCTION_NAME"
+          test -n "$S3_BUCKET_NAME"
+          test -n "$VITE_API_URL"
+          test -n "$S3_WEBSITE_URL"
+          account="$(aws sts get-caller-identity --query Account --output text)"
+          echo "account=$account"
+          echo "region=$AWS_REGION"
+          if [ "$account" != "$EXPECTED_AWS_ACCOUNT" ]; then
+            echo "Refusing to deploy outside the expected AWS account."
+            exit 1
+          fi
+          if [ "$AWS_REGION" != "us-east-1" ]; then
+            echo "Refusing to deploy outside us-east-1."
+            exit 1
+          fi
+
+      - name: Update Lambda code
+        run: |
+          set -euo pipefail
+          aws lambda update-function-code \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --zip-file fileb:///tmp/noticeboard-lambda/noticeboard-lambda.zip \
+            --query '{FunctionName:FunctionName,CodeSize:CodeSize,LastUpdateStatus:LastUpdateStatus}' \
+            --output json
+          aws lambda wait function-updated-v2 --function-name "$LAMBDA_FUNCTION_NAME"
+
+      - name: Verify Lambda state
+        run: |
+          set -euo pipefail
+          aws lambda get-function-configuration \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --query '{State:State,LastUpdateStatus:LastUpdateStatus,Runtime:Runtime,Handler:Handler,LastModified:LastModified}' \
+            --output json > /tmp/lambda-state.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("/tmp/lambda-state.json").read_text(encoding="utf-8"))
+          print(json.dumps(data, indent=2))
+          expected = {
+              "State": "Active",
+              "LastUpdateStatus": "Successful",
+              "Runtime": "python3.12",
+              "Handler": "lambda_function.lambda_handler",
+          }
+          for key, value in expected.items():
+              if data.get(key) != value:
+                  raise SystemExit(f"{key} is {data.get(key)!r}, expected {value!r}")
+          PY
+
+      - name: Sync frontend to S3
+        run: |
+          set -euo pipefail
+          test -f "$PROJECT_DIR/frontend/dist/index.html"
+          aws s3 sync "$PROJECT_DIR/frontend/dist/" "s3://$S3_BUCKET_NAME/" --delete
+          aws s3 ls "s3://$S3_BUCKET_NAME/" --recursive
+
+      - name: Verify deployed API
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: bash scripts/aws_backend_smoke_test.sh
+
+      - name: Verify deployed website
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/noticeboard-index.html -w "%{http_code}" "$S3_WEBSITE_URL")"
+          echo "index.html=$code"
+          test "$code" = "200"
+          python - <<'PY'
+          import os
+          import re
+          import urllib.request
+          from pathlib import Path
+
+          html = Path("/tmp/noticeboard-index.html").read_text(encoding="utf-8", errors="ignore")
+          base = os.environ["S3_WEBSITE_URL"].rstrip("/")
+          api_url = os.environ["VITE_API_URL"].encode()
+          scripts = re.findall(r'<script[^>]+src="([^"]+)"', html)
+          styles = re.findall(r'<link[^>]+href="([^"]+\.css)"', html)
+          icons = re.findall(r'<link[^>]+href="([^"]+favicon[^"]*)"', html)
+          if not scripts:
+              raise SystemExit("index.html does not reference a JavaScript file")
+
+          def fetch(path):
+              url = path if path.startswith("http") else f"{base}/{path.lstrip('/')}"
+              with urllib.request.urlopen(url) as response:
+                  status = response.status
+                  body = response.read()
+                  content_type = response.headers.get("Content-Type", "")
+              print(f"{path} status={status} type={content_type} bytes={len(body)}")
+              if status != 200:
+                  raise SystemExit(f"{path} returned HTTP {status}")
+              return body
+
+          javascript = fetch(scripts[0])
+          if b"localhost:8000" in javascript:
+              raise SystemExit("deployed JavaScript references localhost:8000")
+          if api_url not in javascript:
+              raise SystemExit("deployed JavaScript does not reference the API URL")
+          if styles:
+              fetch(styles[0])
+          if not icons:
+              raise SystemExit("index.html does not reference a favicon")
+          fetch(icons[0])
+          print("website-scan=pass")
+          PY

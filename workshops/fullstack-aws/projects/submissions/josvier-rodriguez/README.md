@@ -262,6 +262,46 @@ Tier 1 uses S3 static website hosting and public-read objects so the site can be
 
 Frontend build and upload steps are in `deployment/AWS_TIER1_FRONTEND.md`.
 
+## Tier 2 — GitHub Actions CI/CD
+
+Pushes to the deployment branch run tests, build the React app, package Lambda, update Lambda code, sync the S3 website, and smoke-test the live API.
+
+| Item | Value |
+| --- | --- |
+| Active deployment branch | `tier2-ci-deploy` |
+| Reference workflow | `github-actions/deploy.yml` |
+| Active fork workflow | `.github/workflows/noticeboard-deploy.yml` on `tier2-ci-deploy` only |
+
+```text
+push
+  -> backend tests
+  -> frontend production build
+  -> Linux Lambda package
+  -> Lambda code deploy
+  -> S3 sync
+  -> API smoke verification
+  -> website verification
+```
+
+GitHub Actions secrets, names only:
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+
+GitHub Actions variables:
+
+- `AWS_REGION`
+- `LAMBDA_FUNCTION_NAME`
+- `S3_BUCKET_NAME`
+- `VITE_API_URL`
+- `S3_WEBSITE_URL`
+
+The active workflow is on `tier2-ci-deploy` because the assignment requires the final upstream pull request to contain only this personal submission folder. The root `.github` file is not part of `challenge/notice-board` and must not be merged back into that branch. The reference copy in `github-actions/deploy.yml` is the submission copy.
+
+The pipeline updates Lambda code only. It does not change the Lambda environment, so the MongoDB connection string stays out of GitHub.
+
+Details and the successful run record are in `deployment/AWS_TIER2_CICD.md`.
+
 ## Security
 
 Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private keys, credential CSV files, Terraform state/secrets, node_modules, dist, or backend build artifacts.
@@ -270,6 +310,6 @@ Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private 
 
 1. Run `make verify` for the local Docker stack.
 2. AWS Tier 1 is deployed: S3 static website, API Gateway, Lambda, and MongoDB Atlas.
-3. Add Tier 2 CI/CD with GitHub Actions.
+3. Tier 2 GitHub Actions deploys from `tier2-ci-deploy`.
 4. Add Tier 3 CloudFront + OAC/private S3.
 5. Finish evidence and upstream PR.
