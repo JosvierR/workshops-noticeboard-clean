@@ -77,9 +77,11 @@ cd backend
 python -m venv .venv
 # macOS/Linux: source .venv/bin/activate
 # Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pytest
 ```
+
+`requirements.txt` is the Lambda runtime package. `requirements-dev.txt` adds pytest, FastAPI, uvicorn, and httpx for local tests only.
 
 Required environment:
 
@@ -105,10 +107,10 @@ npm install
 npm run dev
 ```
 
-Set:
+For the local API adapter, set:
 
 ```text
-VITE_API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:8000
 ```
 
 For AWS, use the API Gateway invoke URL.
@@ -119,7 +121,113 @@ Production build:
 npm run build
 ```
 
-The `dist/` directory is the static artifact for S3.
+The `dist/` directory is the static artifact for S3. Do not commit `dist/`.
+
+## Local Development with Docker
+
+Docker Compose and FastAPI are used only for local development and integration testing.
+
+The required production architecture remains:
+
+```text
+React/S3/CloudFront
+  -> API Gateway
+  -> AWS Lambda (lambda_function.lambda_handler)
+  -> MongoDB Atlas
+```
+
+Local architecture:
+
+```text
+Browser
+  -> React / Vite (http://localhost:5173)
+  -> local FastAPI adapter (http://localhost:8000)
+  -> MongoDB (mongo:27017, database noticeboard_db)
+```
+
+The FastAPI process is not a replacement for Lambda. `backend/local_app.py` calls the existing notice functions in `backend/app/`. The Lambda handler stays `lambda_function.lambda_handler`.
+
+From a fresh clone:
+
+```bash
+git clone https://github.com/JosvierR/workshops.git
+cd workshops
+git checkout challenge/notice-board
+cd workshops/fullstack-aws/projects/submissions/josvier-rodriguez
+docker compose up --build
+```
+
+Then open:
+
+| Surface | URL |
+| --- | --- |
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:8000 |
+| Health | http://localhost:8000/health |
+| Notices | http://localhost:8000/notices |
+
+`VITE_API_URL` is `http://localhost:8000` because the React code runs in the browser. The Compose hostname `backend` is reachable only from other containers, so the browser uses the published localhost port.
+
+Useful commands from this directory:
+
+```bash
+make install   # Python dev dependencies and frontend npm ci
+make test      # backend pytest
+make build     # frontend production build and docker compose build
+make up        # docker compose up -d
+make smoke     # HTTP API smoke test against localhost:8000
+make verify    # tests, production build, compose, smoke, and Mongo persistence
+make down      # stop containers; keeps the Mongo volume
+make logs      # latest container logs
+make ps        # docker compose ps
+make clean     # stop containers and remove orphans; keeps noticeboard_mongo_data
+```
+
+`make down` and `make clean` do not delete the `noticeboard_mongo_data` volume.
+
+MongoDB is not published on the host. The backend reaches it at `mongodb://mongo:27017`. Backend startup waits until Mongo's healthcheck passes.
+
+## AWS Tier 1 Backend
+
+Docker Compose and FastAPI stay local-only. The deployed backend is:
+
+```text
+Browser / HTTP client
+  -> API Gateway HTTP API
+  -> AWS Lambda Python 3.12
+  -> MongoDB Atlas
+```
+
+| Item | Value |
+| --- | --- |
+| AWS account ID | `279249498881` |
+| Region | `us-east-1` |
+| Lambda | NoticeBoardBackend |
+| Runtime | Python 3.12 |
+| Handler | `lambda_function.lambda_handler` |
+| API | NoticeBoardAPI |
+| Stage | `$default` |
+| Database | MongoDB Atlas / `noticeboard_db` / `notices` |
+| Invoke URL | `https://ybemxlautd.execute-api.us-east-1.amazonaws.com` |
+
+Routes:
+
+- `GET /health`
+- `GET /notices`
+- `GET /notices/{id}`
+- `POST /notices`
+- `PUT /notices/{id}`
+- `DELETE /notices/{id}`
+
+Atlas network access for this workshop is `0.0.0.0/0` because the Lambda has no fixed outbound IP. That is a demo choice, not a production recommendation. The database user is limited to `readWrite` on `noticeboard_db`. The connection string lives only in the Lambda environment.
+
+Build, deploy, and smoke-test steps are in `deployment/AWS_TIER1_BACKEND.md`.
+
+To point the local React app at this API, set ignored `frontend/.env`:
+
+```text
+VITE_API_URL=https://ybemxlautd.execute-api.us-east-1.amazonaws.com
+```
 
 ## Security
 
@@ -127,14 +235,9 @@ Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private 
 
 ## Next checkpoints
 
-1. Verify backend tests locally.
-2. Verify frontend build locally.
-3. Create MongoDB Atlas.
-4. Deploy Lambda.
-5. Configure API Gateway routes/CORS.
-6. Connect React to deployed API.
-7. Deploy frontend to S3.
-8. Verify Tier 1 CRUD and persistence.
-9. Add Tier 2 CI/CD.
-10. Add Tier 3 CloudFront + OAC/private S3.
-11. Finish evidence and upstream PR.
+1. Run `make verify` for the local Docker stack.
+2. AWS Tier 1 backend is deployed: Atlas, Lambda, and API Gateway.
+3. Deploy the React production build to S3 and verify Tier 1 in the browser against that static site.
+4. Add Tier 2 CI/CD.
+5. Add Tier 3 CloudFront + OAC/private S3.
+6. Finish evidence and upstream PR.

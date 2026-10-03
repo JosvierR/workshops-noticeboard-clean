@@ -1,6 +1,32 @@
 # Architecture
 
-## Target system
+## Local development
+
+Docker Compose and FastAPI are for local development and integration testing only.
+
+```text
+Browser
+  -> React / Vite (http://localhost:5173)
+  -> FastAPI adapter (http://localhost:8000)
+  -> local MongoDB (noticeboard_db)
+```
+
+`backend/local_app.py` calls the existing notice functions. It is not the production handler.
+
+## AWS Tier 1
+
+```text
+Browser / HTTP client
+  -> API Gateway HTTP API (NoticeBoardAPI)
+  -> AWS Lambda Python 3.12 (lambda_function.lambda_handler)
+  -> MongoDB Atlas (noticeboard_db)
+```
+
+The Lambda reads `MONGO_URI` and `MONGO_DB_NAME` from its environment. Those values are not stored in source control.
+
+## Final target
+
+S3 and CloudFront are not part of the Tier 1 backend checkpoint.
 
 ```text
 +-------------------+
