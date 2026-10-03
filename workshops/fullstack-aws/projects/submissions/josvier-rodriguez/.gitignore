@@ -1,0 +1,24 @@
+# Local environment / credentials
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/_build/
+
+# Node / Vite
+node_modules/
+dist/
+frontend/node_modules/
+frontend/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
