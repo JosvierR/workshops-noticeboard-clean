@@ -15,18 +15,33 @@ Browser
 
 ## AWS Tier 1
 
+The frontend is an S3 static website. The page calls the API over HTTPS.
+
 ```text
-Browser / HTTP client
+Browser
+  -> S3 static website
   -> API Gateway HTTP API (NoticeBoardAPI)
   -> AWS Lambda Python 3.12 (lambda_function.lambda_handler)
   -> MongoDB Atlas (noticeboard_db)
 ```
 
+Tier 1 allows public `s3:GetObject` on the website bucket so the browser can load the files. That public-read website hosting is temporary. Tier 3 replaces it with CloudFront, Origin Access Control, and a private bucket.
+
 The Lambda reads `MONGO_URI` and `MONGO_DB_NAME` from its environment. Those values are not stored in source control.
 
 ## Final target
 
-S3 and CloudFront are not part of the Tier 1 backend checkpoint.
+```text
+Browser
+  -> CloudFront
+  -> private S3 via Origin Access Control
+
+REST calls:
+Browser
+  -> API Gateway HTTP API
+  -> AWS Lambda Python 3.12
+  -> MongoDB Atlas
+```
 
 ```text
 +-------------------+

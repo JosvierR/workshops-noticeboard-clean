@@ -229,6 +229,39 @@ To point the local React app at this API, set ignored `frontend/.env`:
 VITE_API_URL=https://ybemxlautd.execute-api.us-east-1.amazonaws.com
 ```
 
+## AWS Tier 1 — Complete
+
+The verified Tier 1 system is:
+
+```text
+Browser
+  -> Amazon S3 static website
+  -> API Gateway HTTP API
+  -> AWS Lambda Python 3.12
+  -> MongoDB Atlas
+```
+
+| Item | Value |
+| --- | --- |
+| Frontend | Amazon S3 static website |
+| Bucket | `noticeboard-josvier-279249498881-us-east-1` |
+| S3 website URL | `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com` |
+| Backend | API Gateway, Lambda, MongoDB Atlas |
+| API URL | `https://ybemxlautd.execute-api.us-east-1.amazonaws.com` |
+
+Routes:
+
+- `GET /health`
+- `GET /notices`
+- `GET /notices/{id}`
+- `POST /notices`
+- `PUT /notices/{id}`
+- `DELETE /notices/{id}`
+
+Tier 1 uses S3 static website hosting and public-read objects so the site can be opened directly. Tier 3 will replace that direct public S3 access with CloudFront, Origin Access Control, and a private bucket.
+
+Frontend build and upload steps are in `deployment/AWS_TIER1_FRONTEND.md`.
+
 ## Security
 
 Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private keys, credential CSV files, Terraform state/secrets, node_modules, dist, or backend build artifacts.
@@ -236,8 +269,7 @@ Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private 
 ## Next checkpoints
 
 1. Run `make verify` for the local Docker stack.
-2. AWS Tier 1 backend is deployed: Atlas, Lambda, and API Gateway.
-3. Deploy the React production build to S3 and verify Tier 1 in the browser against that static site.
-4. Add Tier 2 CI/CD.
-5. Add Tier 3 CloudFront + OAC/private S3.
-6. Finish evidence and upstream PR.
+2. AWS Tier 1 is deployed: S3 static website, API Gateway, Lambda, and MongoDB Atlas.
+3. Add Tier 2 CI/CD with GitHub Actions.
+4. Add Tier 3 CloudFront + OAC/private S3.
+5. Finish evidence and upstream PR.
