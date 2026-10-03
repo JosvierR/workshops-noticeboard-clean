@@ -191,6 +191,7 @@ export default function App() {
           </div>
         </section>
       </main>
+      <footer className="deploy-note">Deployed with GitHub Actions</footer>
     </div>
   );
 }
