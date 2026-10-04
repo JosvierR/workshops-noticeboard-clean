@@ -150,7 +150,7 @@ The FastAPI process is not a replacement for Lambda. `backend/local_app.py` call
 From a fresh clone:
 
 ```bash
-git clone https://github.com/JosvierR/workshops.git
+git clone https://github.com/JosvierR/workshops-noticeboard-clean.git
 cd workshops
 git checkout challenge/notice-board
 cd workshops/fullstack-aws/projects/submissions/josvier-rodriguez

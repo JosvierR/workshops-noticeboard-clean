@@ -20,7 +20,7 @@ Permissions are `contents: read`. AWS access uses repository secrets because the
 
 ## GitHub configuration
 
-Repository: `JosvierR/workshops`
+Repository: `JosvierR/workshops-noticeboard-clean`
 
 Secrets, names only:
 
@@ -69,4 +69,25 @@ aws s3 sync frontend/dist/ "s3://${S3_BUCKET_NAME}/" --delete
 
 ## Verification runs
 
-Recorded after GitHub reports `conclusion=success`.
+Both runs were push events on `tier2-ci-deploy`. GitHub reported `conclusion=success` for each.
+
+| Run | ID | URL | Conclusion |
+| --- | --- | --- | --- |
+| First, workflow activation | `37163154135` | https://github.com/JosvierR/workshops/actions/runs/37163154135 | success |
+| Second, footer proof | `37163237807` | https://github.com/JosvierR/workshops/actions/runs/37163237807 | success |
+
+The second run rebuilt the frontend after the "Deployed with GitHub Actions" footer was pushed. The live S3 JavaScript contains that text. Lambda `LastModified` moved with each code update, and both runs passed the API smoke test.
+
+Those two runs happened on the previous fork, `JosvierR/workshops`. That fork is quarantined. Current work uses `JosvierR/workshops-noticeboard-clean`.
+
+## Clean fork recovery verification
+
+Repository: `JosvierR/workshops-noticeboard-clean`
+
+Reason: NoticeBoard was recovered into a clean fork after unrelated unauthorized repository activity was isolated from the submission.
+
+The active workflow stays on `tier2-ci-deploy` only. GitHub does not accept `workflow_dispatch` for a workflow that has never run and is absent from the default branch, and `master` is left unchanged. The recovery deployment is therefore the push of this documentation to `tier2-ci-deploy`.
+
+The run ID, URL, conclusion, and Lambda timestamp are recorded on `challenge/notice-board` after that run succeeds.
+
+Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed.
