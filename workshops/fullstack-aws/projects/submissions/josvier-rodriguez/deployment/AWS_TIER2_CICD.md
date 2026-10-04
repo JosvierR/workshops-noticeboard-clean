@@ -86,8 +86,20 @@ Repository: `JosvierR/workshops-noticeboard-clean`
 
 Reason: NoticeBoard was recovered into a clean fork after unrelated unauthorized repository activity was isolated from the submission.
 
-The active workflow stays on `tier2-ci-deploy` only. GitHub does not accept `workflow_dispatch` for a workflow that has never run and is absent from the default branch, and `master` is left unchanged. The recovery deployment is therefore the push of this documentation to `tier2-ci-deploy`.
+The active workflow stays on `tier2-ci-deploy` only. `master` was not changed. GitHub did not accept `workflow_dispatch` while the workflow file was absent from the default branch. Updating that file on `tier2-ci-deploy` started the recovery deployment.
 
-The run ID, URL, conclusion, and Lambda timestamp are recorded on `challenge/notice-board` after that run succeeds.
+Controlled recovery run:
 
-Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed.
+| Item | Value |
+| --- | --- |
+| Run ID | `37219116701` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37219116701 |
+| Event | `push` |
+| Conclusion | success |
+| AWS account | `279249498881` |
+| Region | `us-east-1` |
+| Lambda LastModified | `2026-10-04T17:04:52.000+0000` |
+| API smoke | PASS |
+| S3 website verification | PASS |
+
+Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed. The upstream `Nightly Workshop Cleanup` workflow remains `disabled_fork` and was not enabled.
