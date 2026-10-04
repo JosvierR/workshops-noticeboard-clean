@@ -1,0 +1,22 @@
+@startuml NoticeBoard System Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title NoticeBoard — System Context
+
+Person(user, "Training Manager / User", "Creates, reads, updates, and deletes training notices.")
+Person(dev, "Developer / Maintainer", "Develops and deploys NoticeBoard.")
+
+System(noticeboard, "NoticeBoard", "Web application for centrally managing training notices with persistent cloud storage.")
+
+System_Ext(github, "GitHub", "Source control and CI/CD automation.")
+System_Ext(atlas, "MongoDB Atlas", "Managed persistent document database.")
+System_Ext(cloudwatch, "AWS CloudWatch", "Observability platform receiving logs and metrics and evaluating alarms.")
+
+Rel(user, noticeboard, "Uses")
+Rel(dev, github, "Pushes source")
+Rel(github, noticeboard, "Deploys")
+Rel(noticeboard, atlas, "Persists notices")
+Rel(noticeboard, cloudwatch, "Emits telemetry")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,203 @@
+{
+  "widgets": [
+    {
+      "type": "text",
+      "x": 0,
+      "y": 0,
+      "width": 24,
+      "height": 3,
+      "properties": {
+        "markdown": "# NoticeBoard Production Operations\n\nCloudFront: https://d1s8syl3tltqh9.cloudfront.net\n\nAPI ID: ybemxlautd\n\nLambda: NoticeBoardBackend\n\nRegion: us-east-1"
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 3,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Lambda Invocations",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/Lambda", "Invocations", "FunctionName", "NoticeBoardBackend", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 3,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Lambda Errors",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/Lambda", "Errors", "FunctionName", "NoticeBoardBackend", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 9,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Lambda Duration",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "metrics": [
+          ["AWS/Lambda", "Duration", "FunctionName", "NoticeBoardBackend", { "stat": "Average", "label": "Average" }],
+          ["AWS/Lambda", "Duration", "FunctionName", "NoticeBoardBackend", { "stat": "Maximum", "label": "Maximum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 9,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Lambda Throttles",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/Lambda", "Throttles", "FunctionName", "NoticeBoardBackend", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 15,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "API Count",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/ApiGateway", "Count", "ApiId", "ybemxlautd", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 8,
+      "y": 15,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "API 4xx",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/ApiGateway", "4xx", "ApiId", "ybemxlautd", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 16,
+      "y": 15,
+      "width": 8,
+      "height": 6,
+      "properties": {
+        "title": "API 5xx",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "stat": "Sum",
+        "metrics": [
+          ["AWS/ApiGateway", "5xx", "ApiId", "ybemxlautd", { "stat": "Sum" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 21,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "API Latency",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "metrics": [
+          ["AWS/ApiGateway", "Latency", "ApiId", "ybemxlautd", { "stat": "Average", "label": "Average" }],
+          ["AWS/ApiGateway", "Latency", "ApiId", "ybemxlautd", { "stat": "p95", "label": "p95" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 21,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "API IntegrationLatency",
+        "view": "timeSeries",
+        "stacked": false,
+        "region": "us-east-1",
+        "period": 60,
+        "metrics": [
+          ["AWS/ApiGateway", "IntegrationLatency", "ApiId", "ybemxlautd", { "stat": "Average", "label": "Average" }],
+          ["AWS/ApiGateway", "IntegrationLatency", "ApiId", "ybemxlautd", { "stat": "p95", "label": "p95" }]
+        ]
+      }
+    },
+    {
+      "type": "alarm",
+      "x": 0,
+      "y": 27,
+      "width": 24,
+      "height": 4,
+      "properties": {
+        "title": "Alarm status",
+        "alarms": [
+          "arn:aws:cloudwatch:us-east-1:279249498881:alarm:NoticeBoard-Lambda-Errors",
+          "arn:aws:cloudwatch:us-east-1:279249498881:alarm:NoticeBoard-API-5xx"
+        ]
+      }
+    },
+    {
+      "type": "log",
+      "x": 0,
+      "y": 31,
+      "width": 24,
+      "height": 8,
+      "properties": {
+        "title": "Recent Lambda logs",
+        "region": "us-east-1",
+        "view": "table",
+        "query": "SOURCE '/aws/lambda/NoticeBoardBackend' | fields @timestamp, @message | sort @timestamp desc | limit 50"
+      }
+    }
+  ]
+}

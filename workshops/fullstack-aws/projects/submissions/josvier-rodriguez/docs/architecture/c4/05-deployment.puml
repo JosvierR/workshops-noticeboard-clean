@@ -1,0 +1,52 @@
+@startuml NoticeBoard Production Deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+title NoticeBoard — Production Deployment
+
+Deployment_Node(device, "End User Device", "Browser") {
+    Container(spa, "React SPA runtime", "React + Vite", "Loaded from CloudFront.")
+}
+
+Deployment_Node(github, "GitHub", "JosvierR/workshops-noticeboard-clean") {
+    Deployment_Node(repository, "Repository", "Git") {
+        Container(source, "Submission source", "challenge/notice-board", "Personal submission folder.")
+    }
+    Deployment_Node(runner, "Actions Runner", "ubuntu-latest") {
+        Container(workflow, "NoticeBoard deploy", "GitHub Actions", "Runs from tier2-ci-deploy.")
+    }
+}
+
+Deployment_Node(aws, "AWS Account 279249498881", "Region us-east-1") {
+    Deployment_Node(cfnode, "CloudFront", "Distribution E3OKOFJWSNTBPB") {
+        Container(cloudfront, "CDN", "CloudFront", "HTTPS and Origin Access Control.")
+    }
+    Deployment_Node(s3node, "S3", "noticeboard-josvier-279249498881-us-east-1") {
+        Container(bucket, "Private bucket", "S3", "Frontend objects. Anonymous access denied.")
+    }
+    Deployment_Node(apinode, "API Gateway", "API ybemxlautd") {
+        Container(api, "HTTP API", "API Gateway", "Public JSON routes.")
+    }
+    Deployment_Node(lambdanode, "Lambda", "NoticeBoardBackend") {
+        Container(function, "Function", "Python 3.12", "lambda_function.lambda_handler.")
+    }
+    Deployment_Node(cwnode, "CloudWatch", "Observability") {
+        Container(logs, "Operations", "CloudWatch", "14-day log group, two alarms, one dashboard.")
+    }
+}
+
+Deployment_Node(atlasnode, "MongoDB Atlas", "NoticeBoardCluster") {
+    ContainerDb(database, "noticeboard_db", "MongoDB", "notices collection.")
+}
+
+Rel(spa, cloudfront, "Loads assets", "HTTPS")
+Rel(cloudfront, bucket, "Reads objects", "OAC / SigV4")
+Rel(spa, api, "JSON REST", "HTTPS")
+Rel(api, function, "Invokes", "HTTP API integration")
+Rel(function, database, "Reads and writes", "MongoDB TLS")
+Rel(function, logs, "Logs and metrics")
+Rel(workflow, function, "Updates code", "AWS API")
+Rel(workflow, bucket, "Syncs objects", "AWS API")
+Rel(workflow, cloudfront, "Invalidates", "AWS API")
+
+SHOW_LEGEND()
+@enduml

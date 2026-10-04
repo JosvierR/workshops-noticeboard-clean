@@ -17,6 +17,13 @@ dist/
 frontend/node_modules/
 frontend/dist/
 
+# Packages and local credentials
+*.zip
+*.pem
+*.tfstate
+*.tfvars
+credentials.csv
+
 # OS / editor
 .DS_Store
 Thumbs.db

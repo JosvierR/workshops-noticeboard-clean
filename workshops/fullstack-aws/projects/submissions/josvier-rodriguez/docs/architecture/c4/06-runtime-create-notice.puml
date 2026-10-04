@@ -1,0 +1,33 @@
+@startuml Create Notice Runtime Flow
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+
+title Create Notice — Runtime Flow
+
+Person(user, "User", "Training manager")
+Container(form, "NoticeForm", "React", "Collects the notice.")
+Container(app, "App", "React", "Owns page state.")
+Container(client, "API Client", "src/api/notices.js", "fetch wrapper.")
+Container(api, "API Gateway", "HTTP API", "Public REST edge.")
+Container(handler, "lambda_function.py", "Python", "Route dispatch.")
+Container(validation, "validation.py", "Python", "Payload checks.")
+Container(notices, "notices.py", "Python", "Create operation.")
+Container(db, "db.py", "Python", "MongoDB access.")
+ContainerDb(atlas, "MongoDB Atlas", "noticeboard_db", "notices collection.")
+Container(cloudwatch, "CloudWatch", "Logs and metrics", "Observability.")
+
+RelIndex(1, user, form, "Submits the form")
+RelIndex(2, form, app, "Returns the payload")
+RelIndex(3, app, client, "Calls createNotice")
+RelIndex(4, client, api, "POST /notices", "HTTPS JSON")
+RelIndex(5, api, handler, "Invokes NoticeBoardBackend")
+RelIndex(6, handler, validation, "Validates the payload")
+RelIndex(7, handler, notices, "Creates the notice")
+RelIndex(8, notices, db, "Writes the document")
+RelIndex(9, db, atlas, "Inserts", "MongoDB TLS")
+RelIndex(10, handler, api, "Returns 201")
+RelIndex(11, api, client, "Returns JSON")
+RelIndex(12, app, user, "Shows the new notice")
+RelIndex(13, handler, cloudwatch, "Emits logs and metrics")
+
+SHOW_LEGEND()
+@enduml

@@ -1,0 +1,25 @@
+@startuml NoticeBoard Backend Components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title NoticeBoard — Backend Components
+
+Container_Boundary(lambda, "Lambda backend") {
+    Component(handler, "lambda_function.py", "Python", "API Gateway entry point and route dispatch.")
+    Component(notices, "app/notices.py", "Python", "Notice create, read, update, and delete operations.")
+    Component(validation, "app/validation.py", "Python", "JSON parsing and payload and identifier validation.")
+    Component(responses, "app/responses.py", "Python", "Consistent HTTP response bodies.")
+    Component(db, "app/db.py", "Python", "MongoDB connection and notices collection access.")
+}
+
+Component_Ext(pymongo, "PyMongo", "Python driver", "Database client used by the access layer.")
+ContainerDb_Ext(atlas, "MongoDB Atlas", "Document database", "Persists the notices collection.")
+
+Rel(handler, validation, "Validates the payload")
+Rel(handler, notices, "Calls CRUD operations")
+Rel(handler, responses, "Builds the HTTP response")
+Rel(notices, db, "Reads and writes notices")
+Rel(db, pymongo, "Uses")
+Rel(pymongo, atlas, "Queries", "MongoDB / TLS")
+
+SHOW_LEGEND()
+@enduml

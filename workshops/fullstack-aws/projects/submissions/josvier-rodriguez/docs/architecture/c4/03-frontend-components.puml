@@ -1,0 +1,24 @@
+@startuml NoticeBoard Frontend Components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title NoticeBoard — Frontend Components
+
+Container_Boundary(spa, "React SPA") {
+    Component(app, "App", "App.jsx", "Loads notices, owns edit state, and renders the page.")
+    Component(form, "NoticeForm", "NoticeForm.jsx", "Collects title, message, cohort, and due date.")
+    Component(card, "NoticeCard", "NoticeCard.jsx", "Displays one notice with edit and delete actions.")
+    Component(client, "API Client", "src/api/notices.js", "Sends JSON with fetch to the configured API.")
+}
+
+Component_Ext(browser, "Browser Runtime", "Browser", "Hosts the SPA loaded from CloudFront.")
+Component_Ext(api, "API Gateway", "HTTP API", "Receives HTTPS JSON requests.")
+
+Rel(browser, app, "Renders")
+Rel(app, form, "Renders and receives submit callbacks")
+Rel(app, card, "Renders each notice")
+Rel(form, app, "Returns the form payload")
+Rel(app, client, "Loads and saves notices")
+Rel(client, api, "HTTPS JSON")
+
+SHOW_LEGEND()
+@enduml

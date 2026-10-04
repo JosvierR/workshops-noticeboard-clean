@@ -33,7 +33,10 @@ Variables:
 - `LAMBDA_FUNCTION_NAME` = `NoticeBoardBackend`
 - `S3_BUCKET_NAME` = `noticeboard-josvier-279249498881-us-east-1`
 - `VITE_API_URL` = `https://ybemxlautd.execute-api.us-east-1.amazonaws.com`
-- `S3_WEBSITE_URL` = `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com`
+- `CLOUDFRONT_DISTRIBUTION_ID` = `E3OKOFJWSNTBPB`
+- `CLOUDFRONT_URL` = `https://d1s8syl3tltqh9.cloudfront.net`
+
+`S3_WEBSITE_URL` was a Tier 1 and early Tier 2 variable. It is retired. The historical website was `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com`.
 
 `MONGO_URI` is not a GitHub secret. The workflow never calls `update-function-configuration`.
 
@@ -48,7 +51,7 @@ Variables:
 7. Read Lambda `State`, `LastUpdateStatus`, `Runtime`, `Handler`, and `LastModified` only. Do not print environment variables.
 8. `aws s3 sync frontend/dist/ s3://$S3_BUCKET_NAME/ --delete`.
 9. Run `scripts/aws_backend_smoke_test.sh` against `VITE_API_URL`.
-10. Request the S3 website and require HTTP 200 for `index.html`, the referenced JavaScript, the referenced CSS, and the favicon. The deployed JavaScript must contain the API URL and must not contain `localhost:8000`.
+10. The original Tier 2 workflow requested the public S3 website. Tier 3 replaced that check with CloudFront verification and a required anonymous S3 403. See the evolution section below.
 
 ## Commands used by the workflow
 

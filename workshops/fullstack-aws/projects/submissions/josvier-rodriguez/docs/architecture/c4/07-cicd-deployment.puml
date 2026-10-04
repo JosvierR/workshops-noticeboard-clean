@@ -1,0 +1,32 @@
+@startuml NoticeBoard Deployment Flow
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Dynamic.puml
+
+title NoticeBoard — Deployment Flow
+
+Person(dev, "Developer", "Maintainer")
+System_Ext(github, "GitHub", "Repository")
+Container(actions, "GitHub Actions", "NoticeBoard deploy", "Workflow on tier2-ci-deploy.")
+Container(tests, "Backend tests", "pytest", "Quality job.")
+Container(build, "Frontend build", "npm", "Production Vite build and scan.")
+Container(package, "Lambda package", "zip", "Linux deployment package.")
+Container(guard, "Account guard", "AWS STS", "Account and region check.")
+Container(lambda, "Lambda", "NoticeBoardBackend", "Python 3.12.")
+Container(s3, "Private S3", "Frontend bucket", "Direct public access denied.")
+Container(cloudfront, "CloudFront", "E3OKOFJWSNTBPB", "HTTPS CDN.")
+Container(smoke, "Verification", "curl", "API, CloudFront, and direct S3 checks.")
+Container(cloudwatch, "CloudWatch", "Observability", "Observes runtime after deploy.")
+
+RelIndex(1, dev, github, "Pushes tier2-ci-deploy")
+RelIndex(2, github, actions, "Starts the workflow")
+RelIndex(3, actions, tests, "Runs backend tests")
+RelIndex(4, actions, build, "Runs npm build and scan")
+RelIndex(5, actions, package, "Creates the Lambda zip")
+RelIndex(6, actions, guard, "Checks account and region")
+RelIndex(7, actions, lambda, "Updates function code")
+RelIndex(8, actions, s3, "Syncs frontend/dist")
+RelIndex(9, actions, cloudfront, "Creates invalidation and waits")
+RelIndex(10, actions, smoke, "Runs API, CloudFront, and S3 403 checks")
+RelIndex(11, lambda, cloudwatch, "Emits runtime telemetry")
+
+SHOW_LEGEND()
+@enduml

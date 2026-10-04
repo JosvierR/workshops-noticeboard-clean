@@ -1,0 +1,33 @@
+@startuml NoticeBoard Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title NoticeBoard — Containers
+
+Person(user, "Training Manager / User", "Uses the notice board in a browser.")
+Person(maintainer, "Maintainer", "Reviews operations.")
+
+System_Boundary(noticeboard, "NoticeBoard") {
+    Container(spa, "Browser / React SPA", "React + Vite", "Renders notices and submits JSON.")
+    Container(cloudfront, "CloudFront CDN", "Amazon CloudFront", "Serves the SPA over HTTPS.")
+    Container(s3, "Private Frontend Storage", "Amazon S3", "Stores the production build. Direct public access is denied.")
+    Container(api, "API Edge", "Amazon API Gateway HTTP API", "Accepts HTTPS JSON REST calls.")
+    Container(lambda, "Backend", "AWS Lambda / Python 3.12", "Validates requests and performs notice CRUD.")
+    ContainerDb(atlas, "Database", "MongoDB Atlas", "Persists notices in noticeboard_db.")
+    Container(actions, "CI/CD", "GitHub Actions", "Tests, builds, and deploys.")
+    Container(cloudwatch, "Observability", "Amazon CloudWatch", "Stores logs and metrics and evaluates alarms.")
+}
+
+Rel(user, cloudfront, "Opens the site", "HTTPS")
+Rel(cloudfront, s3, "Reads objects", "OAC + SigV4")
+Rel(spa, api, "JSON REST", "HTTPS")
+Rel(api, lambda, "Invokes", "HTTP API integration")
+Rel(lambda, atlas, "Reads and writes", "MongoDB / TLS")
+Rel(lambda, cloudwatch, "Logs and metrics")
+Rel(api, cloudwatch, "Metrics")
+Rel(actions, lambda, "Deploys code")
+Rel(actions, s3, "Syncs frontend")
+Rel(actions, cloudfront, "Invalidates cache")
+Rel(cloudwatch, maintainer, "Dashboard and alarms")
+
+SHOW_LEGEND()
+@enduml

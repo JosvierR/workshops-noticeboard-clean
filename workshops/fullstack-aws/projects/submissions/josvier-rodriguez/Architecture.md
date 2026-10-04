@@ -1,5 +1,20 @@
 # Architecture
 
+Production frontend: `https://d1s8syl3tltqh9.cloudfront.net`
+
+The browser loads the React app from CloudFront. CloudFront reads the private bucket with Origin Access Control. API calls go from the browser to API Gateway, then Lambda and MongoDB Atlas. CloudWatch keeps 14 days of Lambda logs, two alarms, and the operations dashboard.
+
+## Documentation
+
+- [C4 architecture](docs/architecture/C4_ARCHITECTURE.md)
+- [Tier 1 backend](deployment/AWS_TIER1_BACKEND.md)
+- [Tier 1 frontend, historical](deployment/AWS_TIER1_FRONTEND.md)
+- [Tier 2 CI/CD](deployment/AWS_TIER2_CICD.md)
+- [Tier 3 CloudFront](deployment/AWS_TIER3_CLOUDFRONT.md)
+- [Tier 4 observability](deployment/AWS_TIER4_OBSERVABILITY.md)
+- [Operations runbook](deployment/OPERATIONS_RUNBOOK.md)
+- [Final evidence](deployment/FINAL_EVIDENCE.md)
+
 ## Local development
 
 Docker Compose and FastAPI are for local development and integration testing only.

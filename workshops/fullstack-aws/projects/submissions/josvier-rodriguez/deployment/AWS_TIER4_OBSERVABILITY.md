@@ -1,0 +1,47 @@
+# AWS Tier 4 — Observability
+
+Tier 4 is optional in the assignment and is complete. It adds logging retention, two alarms, and an operations dashboard. It does not change the application path.
+
+| Item | Value |
+| --- | --- |
+| AWS account | `279249498881` |
+| Region | `us-east-1` |
+| Lambda | `NoticeBoardBackend` |
+| API ID | `ybemxlautd` |
+| Log group | `/aws/lambda/NoticeBoardBackend` |
+| Retention | 14 days |
+| Lambda alarm | `NoticeBoard-Lambda-Errors` |
+| API alarm | `NoticeBoard-API-5xx` |
+| Dashboard | `NoticeBoard-Operations` |
+
+## Alarms
+
+`NoticeBoard-Lambda-Errors` sums `AWS/Lambda` `Errors` for `FunctionName=NoticeBoardBackend` over 60 seconds. It enters `ALARM` when that sum is greater than 0.
+
+`NoticeBoard-API-5xx` sums `AWS/ApiGateway` `5xx` for `ApiId=ybemxlautd` over 60 seconds. It enters `ALARM` when that sum is greater than 0.
+
+Both alarms use one evaluation period, one datapoint, and `treatMissingData=notBreaching`. Neither alarm has an action. There is no SNS topic, email, or SMS notification.
+
+A healthy alarm may read `OK` or, immediately after creation, `INSUFFICIENT_DATA`.
+
+## Dashboard
+
+`NoticeBoard-Operations` shows:
+
+- a text header with the CloudFront URL, API ID, Lambda name, and region
+- Lambda invocations, errors, duration (average and maximum), and throttles
+- API count, 4xx, 5xx, latency (average and p95), and integration latency (average and p95)
+- the status of both alarms
+- the 50 most recent Lambda log events
+
+The definition is `observability/cloudwatch-dashboard.json`.
+
+## Verification
+
+`scripts/verify_tier4.ps1` checks the account, retention, both alarm definitions, the dashboard contents, CloudFront HTTP 200, anonymous S3 HTTP 403, and API health HTTP 200.
+
+Provisioning this tier did not change the Lambda code timestamp. A later GitHub Actions deployment may update that timestamp because it deploys application code. That deploy is separate from the CloudWatch configuration.
+
+## Security
+
+The dashboard and alarms contain resource names only. They do not contain database credentials or AWS keys. Log review must not copy environment values into documentation.
