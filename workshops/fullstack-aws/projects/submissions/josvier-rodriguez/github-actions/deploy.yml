@@ -1,4 +1,5 @@
 # NoticeBoard Tier 2 deployment workflow.
+# Active repository: JosvierR/workshops-noticeboard-clean
 # This file is the submission reference. The active copy lives only on
 # branch tier2-ci-deploy at .github/workflows/noticeboard-deploy.yml.
 # Do not merge that root workflow back into challenge/notice-board.
