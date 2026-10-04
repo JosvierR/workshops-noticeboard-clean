@@ -103,3 +103,16 @@ Controlled recovery run:
 | S3 website verification | PASS |
 
 Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed. The upstream `Nightly Workshop Cleanup` workflow remains `disabled_fork` and was not enabled.
+
+## Tier 3 evolution
+
+The Tier 2 pipeline verified the public S3 website after `aws s3 sync`. Tier 3 keeps the tests, Lambda package, and code deploy, then continues with:
+
+```text
+S3 sync
+  -> CloudFront invalidation
+  -> CloudFront verification
+  -> direct S3 denial verification
+```
+
+The historical Tier 2 run evidence above is unchanged.
