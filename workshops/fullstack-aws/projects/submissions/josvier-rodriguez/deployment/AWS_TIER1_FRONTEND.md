@@ -1,6 +1,6 @@
 # NoticeBoard AWS Tier 1 frontend
 
-The production React build is hosted as an S3 static website. This public-read website is the Tier 1 checkpoint. Tier 3 replaces it with CloudFront, Origin Access Control, and a private bucket.
+Tier 1 used S3 static website hosting. Tier 3 superseded it with CloudFront, Origin Access Control, and private S3. The old S3 website is intentionally disabled. This file records the historical Tier 1 checkpoint and does not describe the current production frontend.
 
 ## Resources
 

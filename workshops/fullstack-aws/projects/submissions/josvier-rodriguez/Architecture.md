@@ -13,9 +13,9 @@ Browser
 
 `backend/local_app.py` calls the existing notice functions. It is not the production handler.
 
-## AWS Tier 1
+## AWS Tier 1 — historical
 
-The frontend is an S3 static website. The page calls the API over HTTPS.
+Tier 1 served the frontend from a public S3 static website. That path is retired.
 
 ```text
 Browser
@@ -25,13 +25,13 @@ Browser
   -> MongoDB Atlas (noticeboard_db)
 ```
 
-Tier 1 allows public `s3:GetObject` on the website bucket so the browser can load the files. That public-read website hosting is temporary. Tier 3 replaces it with CloudFront, Origin Access Control, and a private bucket.
+That public-read website was only the Tier 1 checkpoint. Tier 3 replaced it with CloudFront, Origin Access Control, and a private bucket.
 
 The Lambda reads `MONGO_URI` and `MONGO_DB_NAME` from its environment. Those values are not stored in source control.
 
 ## CI/CD
 
-GitHub Actions on `tier2-ci-deploy` ships the same runtime. It does not change the request path below.
+GitHub Actions on `tier2-ci-deploy` deploys Lambda code and the private frontend, then invalidates CloudFront.
 
 ```text
 GitHub push
@@ -47,12 +47,48 @@ GitHub Actions
      |
      +--> update Lambda code
      |
-     +--> sync S3
+     +--> sync private S3
+     |
+     +--> CloudFront invalidation
      |
      +--> API smoke test
 ```
 
-## Final target
+## Tier 3 — current production
+
+```text
+Browser
+   |
+   | HTTPS
+   v
+CloudFront
+   |
+   | OAC / SigV4
+   v
+Private S3
+
+Browser
+   |
+   | HTTPS API calls
+   v
+API Gateway
+   |
+   v
+Lambda
+   |
+   v
+MongoDB Atlas
+
+GitHub Actions
+   |
+   +--> Lambda code
+   |
+   +--> private S3 objects
+   |
+   +--> CloudFront invalidation
+```
+
+## Current deployed architecture
 
 ```text
 Browser

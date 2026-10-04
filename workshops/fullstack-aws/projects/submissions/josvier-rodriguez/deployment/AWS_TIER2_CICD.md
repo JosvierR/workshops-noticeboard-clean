@@ -90,4 +90,29 @@ The active workflow stays on `tier2-ci-deploy` only. GitHub does not accept `wor
 
 The run ID, URL, conclusion, and Lambda timestamp are recorded on `challenge/notice-board` after that run succeeds.
 
-Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed.
+| Item | Value |
+| --- | --- |
+| Run ID | `37219116701` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37219116701 |
+| Event | `push` |
+| Conclusion | success |
+| AWS account | `279249498881` |
+| Region | `us-east-1` |
+| Lambda LastModified | `2026-10-04T17:04:52.000+0000` |
+| API smoke | PASS |
+| S3 website verification | PASS |
+
+Credentials: existing locally configured AWS credentials were reused after user verification. Secret values were not committed or printed. The upstream `Nightly Workshop Cleanup` workflow remains `disabled_fork` and was not enabled.
+
+## Tier 3 evolution
+
+The Tier 2 pipeline verified the public S3 website after `aws s3 sync`. Tier 3 keeps the tests, Lambda package, and code deploy, then continues with:
+
+```text
+S3 sync
+  -> CloudFront invalidation
+  -> CloudFront verification
+  -> direct S3 denial verification
+```
+
+The historical Tier 2 run evidence above is unchanged.

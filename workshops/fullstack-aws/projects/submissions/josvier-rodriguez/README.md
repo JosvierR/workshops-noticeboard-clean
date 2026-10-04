@@ -229,9 +229,9 @@ To point the local React app at this API, set ignored `frontend/.env`:
 VITE_API_URL=https://ybemxlautd.execute-api.us-east-1.amazonaws.com
 ```
 
-## AWS Tier 1 — Complete
+## AWS Tier 1 — historical
 
-The verified Tier 1 system is:
+Tier 1 is a completed milestone. It is not the current production frontend. The verified Tier 1 system was:
 
 ```text
 Browser
@@ -258,13 +258,13 @@ Routes:
 - `PUT /notices/{id}`
 - `DELETE /notices/{id}`
 
-Tier 1 uses S3 static website hosting and public-read objects so the site can be opened directly. Tier 3 will replace that direct public S3 access with CloudFront, Origin Access Control, and a private bucket.
+Tier 1 used S3 static website hosting and public-read objects. Tier 3 superseded that with CloudFront, Origin Access Control, and a private bucket. The old S3 website is disabled.
 
 Frontend build and upload steps are in `deployment/AWS_TIER1_FRONTEND.md`.
 
 ## Tier 2 — GitHub Actions CI/CD
 
-Pushes to the deployment branch run tests, build the React app, package Lambda, update Lambda code, sync the S3 website, and smoke-test the live API.
+Tier 2 is complete. Pushes to the deployment branch run tests, build the React app, package Lambda, and update Lambda code. Tier 3 extended that pipeline to sync the private bucket, invalidate CloudFront, and verify both CloudFront and the direct S3 denial.
 
 | Item | Value |
 | --- | --- |
@@ -279,8 +279,10 @@ push
   -> Linux Lambda package
   -> Lambda code deploy
   -> S3 sync
+  -> CloudFront invalidation
   -> API smoke verification
-  -> website verification
+  -> CloudFront verification
+  -> direct S3 denial check
 ```
 
 GitHub Actions secrets, names only:
@@ -294,13 +296,24 @@ GitHub Actions variables:
 - `LAMBDA_FUNCTION_NAME`
 - `S3_BUCKET_NAME`
 - `VITE_API_URL`
-- `S3_WEBSITE_URL`
+- `CLOUDFRONT_DISTRIBUTION_ID`
+- `CLOUDFRONT_URL`
 
 The active workflow is on `tier2-ci-deploy` because the assignment requires the final upstream pull request to contain only this personal submission folder. The root `.github` file is not part of `challenge/notice-board` and must not be merged back into that branch. The reference copy in `github-actions/deploy.yml` is the submission copy.
 
 The pipeline updates Lambda code only. It does not change the Lambda environment, so the MongoDB connection string stays out of GitHub.
 
 Details and the successful run record are in `deployment/AWS_TIER2_CICD.md`.
+
+## Tier 3 — Complete
+
+The production frontend is CloudFront over HTTPS:
+
+`https://d1s8syl3tltqh9.cloudfront.net`
+
+S3 objects are private. Anonymous direct S3 access is denied. CloudFront uses Origin Access Control to read the bucket. The API remains `https://ybemxlautd.execute-api.us-east-1.amazonaws.com`.
+
+Details are in `deployment/AWS_TIER3_CLOUDFRONT.md`.
 
 ## Security
 
@@ -311,5 +324,5 @@ Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private 
 1. Run `make verify` for the local Docker stack.
 2. AWS Tier 1 is deployed: S3 static website, API Gateway, Lambda, and MongoDB Atlas.
 3. Tier 2 GitHub Actions deploys from `tier2-ci-deploy`.
-4. Add Tier 3 CloudFront + OAC/private S3.
+4. Tier 3 CloudFront + OAC + private S3 is deployed.
 5. Finish evidence and upstream PR.
