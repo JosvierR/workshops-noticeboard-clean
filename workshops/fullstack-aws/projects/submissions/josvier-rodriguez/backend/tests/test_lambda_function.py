@@ -62,6 +62,45 @@ def test_create_notice(mock_create):
     assert body(result)["title"] == "AWS"
 
 
+@patch("lambda_function.create_notice")
+def test_create_notice_accepts_pinned_true(mock_create):
+    created = {
+        "_id": str(ObjectId()),
+        "title": "AWS",
+        "content": "Lambda",
+        "pinned": True,
+    }
+    mock_create.return_value = created
+    result = lambda_function.lambda_handler(
+        event(
+            "POST",
+            "/notices",
+            {"title": "AWS", "content": "Lambda", "pinned": True},
+        ),
+        None,
+    )
+
+    assert result["statusCode"] == 201
+    assert body(result)["pinned"] is True
+    mock_create.assert_called_once_with(
+        {"title": "AWS", "content": "Lambda", "pinned": True}
+    )
+
+
+def test_create_notice_rejects_pinned_string():
+    result = lambda_function.lambda_handler(
+        event(
+            "POST",
+            "/notices",
+            {"title": "AWS", "content": "Lambda", "pinned": "true"},
+        ),
+        None,
+    )
+
+    assert result["statusCode"] == 400
+    assert body(result)["details"]["pinned"] == "pinned must be a boolean"
+
+
 def test_create_notice_rejects_malformed_json():
     result = lambda_function.lambda_handler(
         event("POST", "/notices", "{broken"), None
@@ -95,6 +134,30 @@ def test_update_notice(mock_update):
         None,
     )
     assert result["statusCode"] == 200
+
+
+@patch("lambda_function.update_notice")
+def test_update_notice_can_pin(mock_update):
+    notice_id = str(ObjectId())
+    mock_update.return_value = {
+        "_id": notice_id,
+        "title": "Updated",
+        "content": "Content",
+        "pinned": True,
+    }
+    result = lambda_function.lambda_handler(
+        event(
+            "PUT",
+            f"/notices/{notice_id}",
+            {"pinned": True},
+            notice_id=notice_id,
+        ),
+        None,
+    )
+
+    assert result["statusCode"] == 200
+    assert body(result)["pinned"] is True
+    mock_update.assert_called_once_with(notice_id, {"pinned": True})
 
 
 @patch("lambda_function.delete_notice")

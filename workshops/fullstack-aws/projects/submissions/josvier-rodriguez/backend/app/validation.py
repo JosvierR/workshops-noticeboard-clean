@@ -4,7 +4,7 @@ from datetime import date
 from typing import Any
 
 
-ALLOWED_FIELDS = {"title", "content", "cohort", "dueDate"}
+ALLOWED_FIELDS = {"title", "content", "cohort", "dueDate", "pinned"}
 
 
 def parse_json_body(event: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
@@ -72,5 +72,8 @@ def validate_notice_payload(
             not isinstance(due_date, str) or not _is_iso_date(due_date)
         ):
             errors["dueDate"] = "dueDate must use YYYY-MM-DD format"
+
+    if "pinned" in payload and not isinstance(payload["pinned"], bool):
+        errors["pinned"] = "pinned must be a boolean"
 
     return errors

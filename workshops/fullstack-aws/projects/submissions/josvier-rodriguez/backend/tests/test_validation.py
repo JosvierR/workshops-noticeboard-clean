@@ -56,3 +56,17 @@ def test_unknown_fields_are_rejected():
         partial=False,
     )
     assert "fields" in errors
+
+
+def test_pinned_accepts_only_boolean_values():
+    valid = validate_notice_payload(
+        {"title": "Hello", "content": "World", "pinned": True},
+        partial=False,
+    )
+    invalid = validate_notice_payload(
+        {"title": "Hello", "content": "World", "pinned": "true"},
+        partial=False,
+    )
+
+    assert "pinned" not in valid
+    assert invalid["pinned"] == "pinned must be a boolean"

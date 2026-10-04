@@ -1,6 +1,19 @@
 # NoticeBoardTracker — Josvier Rodriguez
 
-Weekend challenge submission for the BeCloudReady Full-Stack AWS 28-Sep-2026 cohort.
+NoticeBoard Training Pulse is a lightweight training operations workspace that
+turns cohort announcements and deadlines into a prioritized operational feed.
+It helps a training manager know what each cohort needs next without adding a
+separate analytics or AI service.
+
+Product capabilities:
+
+- locally derived overdue, today, soon, upcoming, and no-deadline priorities
+- pinning with backward-compatible persistence
+- instant search plus attention, week, pinned, and cohort filters
+- keyboard command palette for navigation and common actions
+- responsive notice composer, accessible dialogs, toasts, and reduced motion
+
+Built for the BeCloudReady Full-Stack AWS 28-Sep-2026 cohort.
 
 ## Goal
 
@@ -82,6 +95,7 @@ Validation behavior:
   "content": "string",
   "cohort": "optional string",
   "dueDate": "optional YYYY-MM-DD string",
+  "pinned": "optional boolean, defaults to false",
   "createdAt": "UTC ISO-8601 timestamp",
   "updatedAt": "UTC ISO-8601 timestamp"
 }
