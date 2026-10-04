@@ -4,6 +4,12 @@ Production frontend: `https://d1s8syl3tltqh9.cloudfront.net`
 
 The browser loads the React app from CloudFront. CloudFront reads the private bucket with Origin Access Control. API calls go from the browser to API Gateway, then Lambda and MongoDB Atlas. CloudWatch keeps 14 days of Lambda logs, two alarms, and the operations dashboard.
 
+The React application presents the data as Training Pulse. `App` owns remote
+and discovery state; `noticePriority.js` derives local-calendar priority without
+persisting presentation fields; and the API continues to own ordinary notice
+CRUD plus the backward-compatible `pinned` boolean. No AWS container or network
+path changed for this product release.
+
 ## Documentation
 
 - [C4 architecture](docs/architecture/C4_ARCHITECTURE.md)
@@ -160,14 +166,14 @@ Browser REST calls:
 
 ## POST /notices flow
 
-1. React validates title/content.
+1. React validates title/content and sends the optional `pinned` boolean.
 2. Browser sends JSON to API Gateway.
 3. API Gateway invokes Lambda.
 4. Lambda parses and validates the request.
 5. Lambda inserts the notice into MongoDB Atlas.
 6. MongoDB returns the inserted ObjectId.
 7. Lambda serializes the resource and returns HTTP 201.
-8. React reloads the notice list.
+8. React inserts the successful response into its prioritized Training Pulse.
 
 ## Design decisions
 

@@ -13,13 +13,14 @@ def _now_iso() -> str:
 def _serialize_notice(document: dict[str, Any]) -> dict[str, Any]:
     notice = dict(document)
     notice["_id"] = str(notice["_id"])
+    notice.setdefault("pinned", False)
     return notice
 
 
 def _clean_payload(payload: dict[str, Any]) -> dict[str, Any]:
     cleaned: dict[str, Any] = {}
 
-    for field in ("title", "content", "cohort", "dueDate"):
+    for field in ("title", "content", "cohort", "dueDate", "pinned"):
         if field not in payload:
             continue
 
@@ -52,6 +53,7 @@ def create_notice(payload: dict[str, Any]) -> dict[str, Any]:
     now = _now_iso()
 
     document = _clean_payload(payload)
+    document.setdefault("pinned", False)
     document["createdAt"] = now
     document["updatedAt"] = now
 

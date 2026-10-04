@@ -39,6 +39,7 @@ Responses are JSON except HTTP 204 responses.
   "content": "Complete the Lambda exercise.",
   "cohort": "Full-Stack AWS 28-Sep-2026",
   "dueDate": "2026-10-05",
+  "pinned": false,
   "createdAt": "2026-10-03T17:00:00Z",
   "updatedAt": "2026-10-03T17:00:00Z"
 }
@@ -53,6 +54,7 @@ Optional:
 
 - `cohort`
 - `dueDate`
+- `pinned` (boolean, defaults to `false`)
 
 Server-owned:
 
@@ -82,6 +84,7 @@ Response: **200**
     "content": "Complete the Lambda exercise.",
     "cohort": "Full-Stack AWS 28-Sep-2026",
     "dueDate": "2026-10-05",
+    "pinned": false,
     "createdAt": "2026-10-03T17:00:00Z",
     "updatedAt": "2026-10-03T17:00:00Z"
   }
@@ -123,7 +126,8 @@ Request:
   "title": "AWS Workshop Update",
   "content": "Complete the Lambda exercise.",
   "cohort": "Full-Stack AWS 28-Sep-2026",
-  "dueDate": "2026-10-05"
+  "dueDate": "2026-10-05",
+  "pinned": true
 }
 ```
 
@@ -228,5 +232,19 @@ Internal exception messages, stack traces, credentials, connection strings, and 
 - optional
 - `YYYY-MM-DD`
 - blank value is persisted as `null`
+
+### pinned
+
+- optional boolean
+- defaults to `false` when omitted on create
+- existing documents without the field serialize as `false`
+- strings and other non-boolean values are rejected
+
+## Client-side Training Pulse states
+
+`OVERDUE`, `TODAY`, `SOON`, `UPCOMING`, and `NO_DATE` are presentation states
+derived by the React client from `dueDate` using local calendar semantics. They
+are not API fields and are never persisted. `pinned` is persisted separately
+and takes precedence when the client sorts the operational feed.
 
 Unknown request fields are rejected with HTTP 400.

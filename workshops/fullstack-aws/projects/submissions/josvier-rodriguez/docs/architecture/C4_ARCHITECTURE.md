@@ -70,22 +70,37 @@ Scope: the React SPA only.
 C4Component
 title NoticeBoard Frontend Components
 Container_Boundary(spa, "React SPA") {
-    Component(app, "App", "App.jsx", "Loads notices and owns page state")
-    Component(form, "NoticeForm", "NoticeForm.jsx", "Collects title, message, cohort, and due date")
-    Component(card, "NoticeCard", "NoticeCard.jsx", "Shows one notice and its actions")
+    Component(app, "App", "App.jsx", "Owns notices, discovery state, overlays, and mutations")
+    Component(header, "AppHeader", "AppHeader.jsx", "Navigation, search, commands, and create actions")
+    Component(stats, "OverviewStats", "OverviewStats.jsx", "Lightweight operational metrics")
+    Component(pulse, "TrainingPulse", "TrainingPulse.jsx", "Prioritized operational feed")
+    Component(filters, "NoticeFilters", "NoticeFilters.jsx", "Status and cohort filters")
+    Component(composer, "NoticeComposer", "NoticeComposer.jsx", "Create and edit modal or mobile sheet")
+    Component(card, "NoticeCard", "NoticeCard.jsx", "Notice content and edit, pin, delete menu")
+    Component(commands, "CommandPalette", "CommandPalette.jsx", "Keyboard commands and notice search")
+    Component(priority, "Priority Utilities", "src/utils/noticePriority.js", "Derived priority and sorting")
     Component(client, "API Client", "src/api/notices.js", "fetch calls to the configured API")
 }
 Component_Ext(browser, "Browser Runtime", "Browser", "Hosts the SPA from CloudFront")
 Component_Ext(api, "API Gateway", "HTTP API", "Receives JSON REST calls")
 Rel(browser, app, "Renders")
-Rel(app, form, "Renders and receives callbacks")
-Rel(app, card, "Renders each notice")
-Rel(form, app, "Returns the payload")
+Rel(app, header, "Renders")
+Rel(app, stats, "Supplies metrics")
+Rel(app, pulse, "Supplies prioritized notices")
+Rel(app, filters, "Owns filter state")
+Rel(app, composer, "Opens and receives form payloads")
+Rel(app, commands, "Supplies commands and notices")
+Rel(pulse, card, "Renders grouped cards")
+Rel(app, priority, "Derives feed state")
 Rel(app, client, "Loads and saves notices")
 Rel(client, api, "HTTPS JSON")
 ```
 
-`App` holds the notice list and the notice being edited. `NoticeForm` and `NoticeCard` do not call the network themselves. `src/api/notices.js` is the only frontend module that calls API Gateway.
+`App` owns the notice list and the local discovery/overlay state. Training Pulse
+uses `noticePriority.js` to derive local-calendar states and sort pinned notices
+without persisting presentation fields. Components do not call the network
+themselves; `src/api/notices.js` remains the only frontend module that calls API
+Gateway.
 
 ## Backend components
 
