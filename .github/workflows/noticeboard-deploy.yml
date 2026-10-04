@@ -105,7 +105,8 @@ jobs:
       LAMBDA_FUNCTION_NAME: ${{ vars.LAMBDA_FUNCTION_NAME }}
       S3_BUCKET_NAME: ${{ vars.S3_BUCKET_NAME }}
       VITE_API_URL: ${{ vars.VITE_API_URL }}
-      S3_WEBSITE_URL: ${{ vars.S3_WEBSITE_URL }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+      CLOUDFRONT_URL: ${{ vars.CLOUDFRONT_URL }}
       API_BASE_URL: ${{ vars.VITE_API_URL }}
     steps:
       - name: Check out repository
@@ -181,7 +182,8 @@ jobs:
           test -n "$LAMBDA_FUNCTION_NAME"
           test -n "$S3_BUCKET_NAME"
           test -n "$VITE_API_URL"
-          test -n "$S3_WEBSITE_URL"
+          test -n "$CLOUDFRONT_DISTRIBUTION_ID"
+          test -n "$CLOUDFRONT_URL"
           account="$(aws sts get-caller-identity --query Account --output text)"
           echo "account=$account"
           echo "region=$AWS_REGION"
@@ -235,14 +237,45 @@ jobs:
           aws s3 sync "$PROJECT_DIR/frontend/dist/" "s3://$S3_BUCKET_NAME/" --delete
           aws s3 ls "s3://$S3_BUCKET_NAME/" --recursive
 
+      - name: Invalidate CloudFront
+        run: |
+          set -euo pipefail
+          invalidation_id="$(aws cloudfront create-invalidation \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)"
+          test -n "$invalidation_id"
+          echo "invalidation_id=$invalidation_id"
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --id "$invalidation_id"
+
       - name: Verify deployed API
         working-directory: ${{ env.PROJECT_DIR }}
         run: bash scripts/aws_backend_smoke_test.sh
 
-      - name: Verify deployed website
+      - name: Verify CloudFront distribution
         run: |
           set -euo pipefail
-          code="$(curl -sS -o /tmp/noticeboard-index.html -w "%{http_code}" "$S3_WEBSITE_URL")"
+          aws cloudfront get-distribution \
+            --id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --query '{Status:Distribution.Status,Enabled:Distribution.DistributionConfig.Enabled,Domain:Distribution.DomainName}' \
+            --output json > /tmp/cloudfront-state.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("/tmp/cloudfront-state.json").read_text(encoding="utf-8"))
+          print(json.dumps(data, indent=2))
+          if data.get("Status") != "Deployed" or data.get("Enabled") is not True:
+              raise SystemExit("CloudFront distribution is not deployed and enabled")
+          PY
+
+      - name: Verify CloudFront website
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/noticeboard-index.html -w "%{http_code}" "$CLOUDFRONT_URL")"
           echo "index.html=$code"
           test "$code" = "200"
           python - <<'PY'
@@ -252,7 +285,7 @@ jobs:
           from pathlib import Path
 
           html = Path("/tmp/noticeboard-index.html").read_text(encoding="utf-8", errors="ignore")
-          base = os.environ["S3_WEBSITE_URL"].rstrip("/")
+          base = os.environ["CLOUDFRONT_URL"].rstrip("/")
           api_url = os.environ["VITE_API_URL"].encode()
           scripts = re.findall(r'<script[^>]+src="([^"]+)"', html)
           styles = re.findall(r'<link[^>]+href="([^"]+\.css)"', html)
@@ -276,10 +309,20 @@ jobs:
               raise SystemExit("deployed JavaScript references localhost:8000")
           if api_url not in javascript:
               raise SystemExit("deployed JavaScript does not reference the API URL")
+          if b"Deployed with GitHub Actions" not in javascript:
+              raise SystemExit("deployment proof text is missing")
           if styles:
               fetch(styles[0])
           if not icons:
               raise SystemExit("index.html does not reference a favicon")
           fetch(icons[0])
-          print("website-scan=pass")
+          print("cloudfront-scan=pass")
           PY
+
+      - name: Verify direct S3 access is denied
+        run: |
+          set -euo pipefail
+          object_url="https://${S3_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/index.html"
+          code="$(curl -sS -o /tmp/noticeboard-direct-s3.txt -w "%{http_code}" "$object_url")"
+          echo "direct_s3=$code"
+          test "$code" = "403"
