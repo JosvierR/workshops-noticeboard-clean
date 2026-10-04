@@ -6,6 +6,23 @@ Weekend challenge submission for the BeCloudReady Full-Stack AWS 28-Sep-2026 coh
 
 Build and deploy a small full-stack Notice Board application for an EdTech training workflow.
 
+| Milestone | Status |
+| --- | --- |
+| Tier 1 — API, Lambda, Atlas, historical S3 website | COMPLETE |
+| Tier 2 — GitHub Actions | COMPLETE |
+| Tier 3 — CloudFront, OAC, private S3 | COMPLETE |
+| Tier 4 — CloudWatch observability | COMPLETE |
+
+Production frontend: `https://d1s8syl3tltqh9.cloudfront.net`
+
+The site is served by CloudFront with Origin Access Control. S3 objects are private. GitHub Actions deploys Lambda code and the frontend, then invalidates CloudFront. CloudWatch keeps Lambda logs for 14 days and alarms on Lambda errors and API 5xx responses.
+
+- [Architecture](Architecture.md)
+- [C4 diagrams](docs/architecture/C4_ARCHITECTURE.md)
+- [Tier 4 observability](deployment/AWS_TIER4_OBSERVABILITY.md)
+- [Operations runbook](deployment/OPERATIONS_RUNBOOK.md)
+- [Final evidence](deployment/FINAL_EVIDENCE.md)
+
 Target architecture:
 
 ```text
@@ -24,6 +41,8 @@ AWS Lambda (Python 3.12)
   v
 MongoDB Atlas
 ```
+
+API calls go from the browser to API Gateway. They do not pass through S3 or CloudFront.
 
 ## Repository boundary
 
@@ -315,6 +334,12 @@ S3 objects are private. Anonymous direct S3 access is denied. CloudFront uses Or
 
 Details are in `deployment/AWS_TIER3_CLOUDFRONT.md`.
 
+## Tier 4 — Complete
+
+CloudWatch log group `/aws/lambda/NoticeBoardBackend` retains events for 14 days. `NoticeBoard-Lambda-Errors` alarms when Lambda errors are greater than 0. `NoticeBoard-API-5xx` alarms when HTTP API 5xx responses are greater than 0. `NoticeBoard-Operations` shows the Lambda and API metrics, both alarms, and recent Lambda logs.
+
+Details are in `deployment/AWS_TIER4_OBSERVABILITY.md` and `deployment/OPERATIONS_RUNBOOK.md`.
+
 ## Security
 
 Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private keys, credential CSV files, Terraform state/secrets, node_modules, dist, or backend build artifacts.
@@ -325,4 +350,5 @@ Never commit real .env files, AWS credentials, MongoDB credentials, PEM/private 
 2. AWS Tier 1 is deployed: S3 static website, API Gateway, Lambda, and MongoDB Atlas.
 3. Tier 2 GitHub Actions deploys from `tier2-ci-deploy`.
 4. Tier 3 CloudFront + OAC + private S3 is deployed.
-5. Finish evidence and upstream PR.
+5. Tier 4 CloudWatch observability is deployed.
+6. Evidence is indexed in `deployment/FINAL_EVIDENCE.md`. The upstream pull request is not opened yet.
