@@ -55,6 +55,19 @@ GitHub variables: `CLOUDFRONT_DISTRIBUTION_ID` and `CLOUDFRONT_URL`. `S3_WEBSITE
 - CORS preflight from the CloudFront origin: HTTP 204
 - Direct S3 REST `/index.html`: HTTP 403
 
-The GitHub Actions run ID is recorded on this branch after that run succeeds.
+## Successful Tier 3 run
+
+| Item | Value |
+| --- | --- |
+| Run ID | `37221412583` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37221412583 |
+| Event | `push` |
+| Conclusion | success |
+| Invalidation ID | `I7PQD46KEB6JEI2UCIZHGAI3S5` |
+| CloudFront index | HTTP 200 |
+| Direct S3 `/index.html` | HTTP 403 |
+| API smoke | PASS |
+
+A browser check on `https://d1s8syl3tltqh9.cloudfront.net` created, updated, refreshed, and deleted a notice through API Gateway. There were no CORS, mixed-content, or failed asset requests.
 
 Repeat the local checks with `scripts/verify_tier3.ps1`.
