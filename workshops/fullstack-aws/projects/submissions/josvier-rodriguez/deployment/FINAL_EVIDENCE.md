@@ -86,4 +86,15 @@ The root deploy workflow stays on `tier2-ci-deploy` and is not part of that pull
 
 ## Final regression run
 
-The successful GitHub Actions run for this seal is recorded here after that run finishes. It is committed only on `challenge/notice-board`.
+| Item | Value |
+| --- | --- |
+| Run ID | `37226018552` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37226018552 |
+| Event | `push` |
+| Conclusion | success |
+| Invalidation ID | `I220GLQVR0ODKIL08GH4MBHKHQ` |
+| CloudFront index | HTTP 200 |
+| Direct S3 `/index.html` | HTTP 403 |
+| API smoke | PASS |
+
+This evidence commit stays on `challenge/notice-board` only.

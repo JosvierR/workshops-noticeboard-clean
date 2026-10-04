@@ -40,7 +40,9 @@ The definition is `observability/cloudwatch-dashboard.json`.
 
 `scripts/verify_tier4.ps1` checks the account, retention, both alarm definitions, the dashboard contents, CloudFront HTTP 200, anonymous S3 HTTP 403, and API health HTTP 200.
 
-Provisioning this tier did not change the Lambda code timestamp. A later GitHub Actions deployment may update that timestamp because it deploys application code. That deploy is separate from the CloudWatch configuration.
+Provisioning this tier did not change Lambda code or configuration. The later GitHub Actions run `37226018552` updated Lambda code in the normal deploy path and moved `LastModified` to `2026-10-04T18:51:43.000+0000`. Runtime, handler, memory, and timeout stayed the same. That deploy is separate from the CloudWatch configuration.
+
+Final regression: https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37226018552 (`push`, success).
 
 ## Security
 
