@@ -33,8 +33,40 @@ GitHub Actions workflow `NoticeBoard deploy` runs from `tier2-ci-deploy`. Histor
 | --- | --- | --- |
 | `37219116701` | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37219116701 | success |
 | `37221412583` | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37221412583 | success |
+| `37245353234` | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37245353234 | success |
 
 The workflow updates Lambda code only. It does not read or change the Lambda environment.
+
+## Product UI / Training Pulse release
+
+Release date: 2026-10-04
+
+| Item | Evidence |
+| --- | --- |
+| Feature branch | `feature/training-pulse-ui` at `5a6de9c5e3fe873b76e23a3527af21b17e9cdde9` |
+| Challenge branch | `challenge/notice-board` at `5a6de9c5e3fe873b76e23a3527af21b17e9cdde9` |
+| Deployment branch | `tier2-ci-deploy` at `5c379cf3380006c4498c0af34f3500624977d570` |
+| Deployment run | `37245353234` — success |
+| Test and build job | success, 40 backend tests and production frontend build |
+| Deploy and verify job | success, Lambda, private S3, CloudFront invalidation, API and access checks |
+
+Training Pulse derives overdue, today, soon, upcoming, and no-deadline states
+from local calendar dates. Pinned is the only new persisted field; it is an
+optional strict boolean, defaults to `false`, and older MongoDB documents
+serialize safely without a migration.
+
+Production browser verification covered create, edit, pin, unpin, refresh
+persistence, search, status filters, cohort filtering, combined filters,
+command palette, custom delete confirmation, and final cleanup of the QA
+record. Responsive checks passed at 1440, 1280, 1024, 768, 430, 390, and 375
+pixels with no horizontal overflow. The final automated WCAG A/AA audit found
+zero violations; the browser console and runtime error log were empty.
+
+| Frontend assets | Before | After | Increase |
+| --- | ---: | ---: | ---: |
+| JavaScript | 229,395 bytes | 388,926 bytes | 159,531 bytes |
+| CSS | 4,888 bytes | 24,034 bytes | 19,146 bytes |
+| Combined | 234,283 bytes | 412,960 bytes | 178,677 bytes |
 
 ## Tier 3
 
@@ -88,11 +120,12 @@ The root deploy workflow stays on `tier2-ci-deploy` and is not part of that pull
 
 | Item | Value |
 | --- | --- |
-| Run ID | `37226018552` |
-| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37226018552 |
+| Run ID | `37245353234` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37245353234 |
 | Event | `push` |
 | Conclusion | success |
-| Invalidation ID | `I220GLQVR0ODKIL08GH4MBHKHQ` |
+| CI head | `5c379cf3380006c4498c0af34f3500624977d570` |
+| Invalidation ID | `I6CJ5HXV49BRDM64RFVZBKPCJC` |
 | CloudFront index | HTTP 200 |
 | Direct S3 `/index.html` | HTTP 403 |
 | API smoke | PASS |
