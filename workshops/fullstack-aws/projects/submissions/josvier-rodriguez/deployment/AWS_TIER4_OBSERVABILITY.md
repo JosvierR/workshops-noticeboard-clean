@@ -40,6 +40,8 @@ The definition is `observability/cloudwatch-dashboard.json`.
 
 `scripts/verify_tier4.ps1` checks the account, retention, both alarm definitions, the dashboard contents, CloudFront HTTP 200, anonymous S3 HTTP 403, and API health HTTP 200.
 
+The production GitHub Actions pipeline now performs a read-only observability gate after deployment. It checks that log retention is 14 days, that `NoticeBoard-Lambda-Errors` and `NoticeBoard-API-5xx` are both `OK` with their expected configuration, and that `NoticeBoard-Operations` exists and references the Lambda and API metrics plus the Lambda log group. The step does not create or change CloudWatch resources. `ALARM` and `INSUFFICIENT_DATA` both fail the deployment.
+
 Provisioning this tier did not change Lambda code or configuration. The later GitHub Actions run `37226018552` updated Lambda code in the normal deploy path and moved `LastModified` to `2026-10-04T18:51:43.000+0000`. Runtime, handler, memory, and timeout stayed the same. That deploy is separate from the CloudWatch configuration.
 
 Final regression: https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37226018552 (`push`, success).
