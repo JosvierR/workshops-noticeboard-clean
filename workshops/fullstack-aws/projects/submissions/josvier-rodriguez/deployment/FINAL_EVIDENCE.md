@@ -138,3 +138,21 @@ The root deploy workflow stays on `tier2-ci-deploy` and is not part of that pull
 | API smoke | PASS |
 
 This evidence commit stays on `challenge/notice-board` only.
+
+## Observability gate run
+
+| Item | Value |
+| --- | --- |
+| Run ID | `37247453880` |
+| Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37247453880 |
+| Event | `push` |
+| Conclusion | success |
+| Log retention | 14 days |
+| Lambda alarm | `OK` |
+| API alarm | `OK` |
+| Dashboard | present |
+| CloudFront index | HTTP 200 |
+| Direct S3 `/index.html` | HTTP 403 |
+| API health | HTTP 200 |
+
+This run is recorded only on `challenge/notice-board`.
