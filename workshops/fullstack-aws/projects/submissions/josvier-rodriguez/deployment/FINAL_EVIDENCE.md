@@ -62,6 +62,13 @@ Details: `AWS_TIER3_CLOUDFRONT.md`.
 
 Recent Lambda log streams are visible in CloudWatch. Details: `AWS_TIER4_OBSERVABILITY.md`.
 
+The production workflow verifies this after every deployment, without changing CloudWatch:
+
+- log retention is 14 days
+- `NoticeBoard-Lambda-Errors` is `OK`
+- `NoticeBoard-API-5xx` is `OK`
+- dashboard `NoticeBoard-Operations` exists
+
 ## Security
 
 - No AWS keys, MongoDB URIs, or private keys are tracked.
