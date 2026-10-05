@@ -6,7 +6,8 @@
 # The final upstream PR must contain only this submission directory.
 #
 # Tier 2 deploys application code and frontend files only. It does not
-# change Lambda environment variables, API Gateway, Atlas, or the bucket policy.
+# change Lambda environment variables, API Gateway, Atlas, the bucket policy,
+# or CloudWatch resources. The last step only reads those resources.
 
 name: NoticeBoard deploy
 
@@ -326,3 +327,94 @@ jobs:
           code="$(curl -sS -o /tmp/noticeboard-direct-s3.txt -w "%{http_code}" "$object_url")"
           echo "direct_s3=$code"
           test "$code" = "403"
+
+      - name: Verify CloudWatch observability
+        run: |
+          set -euo pipefail
+          aws logs describe-log-groups \
+            --log-group-name-prefix "/aws/lambda/NoticeBoardBackend" \
+            --query "logGroups[?logGroupName=='/aws/lambda/NoticeBoardBackend'].{logGroupName:logGroupName,retentionInDays:retentionInDays}" \
+            --output json > /tmp/log-retention.json
+          aws cloudwatch describe-alarms \
+            --alarm-names NoticeBoard-Lambda-Errors NoticeBoard-API-5xx \
+            --output json > /tmp/alarms.json
+          aws cloudwatch get-dashboard \
+            --dashboard-name NoticeBoard-Operations \
+            --output json > /tmp/dashboard.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          def load(path):
+              return json.loads(Path(path).read_text(encoding="utf-8"))
+
+          groups = load("/tmp/log-retention.json")
+          if len(groups) != 1 or groups[0].get("logGroupName") != "/aws/lambda/NoticeBoardBackend":
+              raise SystemExit("Lambda log group is missing")
+          retention = groups[0].get("retentionInDays")
+          if retention != 14:
+              raise SystemExit(f"log retention is {retention}")
+
+          alarms = {item["AlarmName"]: item for item in load("/tmp/alarms.json").get("MetricAlarms", [])}
+
+          def require_alarm(name, namespace, metric, dimension_name, dimension_value):
+              alarm = alarms.get(name)
+              if alarm is None:
+                  raise SystemExit(f"{name} is missing")
+              expected = {
+                  "Namespace": namespace,
+                  "MetricName": metric,
+                  "Statistic": "Sum",
+                  "Period": 60,
+                  "ComparisonOperator": "GreaterThanThreshold",
+                  "TreatMissingData": "notBreaching",
+              }
+              for key, value in expected.items():
+                  if alarm.get(key) != value:
+                      raise SystemExit(f"{name} {key} is {alarm.get(key)!r}")
+              if float(alarm.get("Threshold")) != 0:
+                  raise SystemExit(f"{name} threshold is {alarm.get('Threshold')!r}")
+              dimensions = alarm.get("Dimensions") or []
+              if dimensions != [{"Name": dimension_name, "Value": dimension_value}]:
+                  raise SystemExit(f"{name} dimension is {dimensions!r}")
+              state = alarm.get("StateValue")
+              if state != "OK":
+                  raise SystemExit(f"{name} state is {state}")
+              return state
+
+          lambda_state = require_alarm(
+              "NoticeBoard-Lambda-Errors",
+              "AWS/Lambda",
+              "Errors",
+              "FunctionName",
+              "NoticeBoardBackend",
+          )
+          api_state = require_alarm(
+              "NoticeBoard-API-5xx",
+              "AWS/ApiGateway",
+              "5xx",
+              "ApiId",
+              "ybemxlautd",
+          )
+
+          dashboard = load("/tmp/dashboard.json")
+          body = dashboard.get("DashboardBody") or ""
+          required = (
+              "AWS/Lambda",
+              "Errors",
+              "Invocations",
+              "AWS/ApiGateway",
+              "5xx",
+              "Count",
+              "/aws/lambda/NoticeBoardBackend",
+          )
+          missing = [token for token in required if token not in body]
+          if not body or missing:
+              raise SystemExit("dashboard is missing required references")
+
+          print("cloudwatch-log-retention=14")
+          print(f"lambda-alarm={lambda_state}")
+          print(f"api-alarm={api_state}")
+          print("dashboard=present")
+          print("observability-gate=pass")
+          PY
