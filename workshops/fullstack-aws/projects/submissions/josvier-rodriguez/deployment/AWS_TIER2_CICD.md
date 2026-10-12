@@ -31,12 +31,12 @@ Variables:
 
 - `AWS_REGION` = `us-east-1`
 - `LAMBDA_FUNCTION_NAME` = `NoticeBoardBackend`
-- `S3_BUCKET_NAME` = `noticeboard-josvier-279249498881-us-east-1`
+- `S3_BUCKET_NAME` = `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1`
 - `VITE_API_URL` = `https://ybemxlautd.execute-api.us-east-1.amazonaws.com`
 - `CLOUDFRONT_DISTRIBUTION_ID` = `E3OKOFJWSNTBPB`
 - `CLOUDFRONT_URL` = `https://d1s8syl3tltqh9.cloudfront.net`
 
-`S3_WEBSITE_URL` was a Tier 1 and early Tier 2 variable. It is retired. The historical website was `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com`.
+`S3_WEBSITE_URL` was a Tier 1 and early Tier 2 variable. It is retired. The historical website was `http://noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1.s3-website-us-east-1.amazonaws.com`.
 
 `MONGO_URI` is not a GitHub secret. The workflow never calls `update-function-configuration`.
 
@@ -46,7 +46,7 @@ Variables:
 2. `npm ci` and `npm run build` with `VITE_API_URL`. Fail if `frontend/dist/index.html` is missing, if the build contains `localhost:8000`, or if the configured API URL is absent.
 3. On the Ubuntu runner, install `backend/requirements.txt` into a temporary directory, copy `lambda_function.py` and `app/`, and zip those contents so the handler is at the zip root.
 4. Authenticate with `aws-actions/configure-aws-credentials@v6`.
-5. Stop unless `aws sts get-caller-identity` returns account `279249498881` and the region is `us-east-1`.
+5. Stop unless `aws sts get-caller-identity` returns account `YOUR_AWS_ACCOUNT_ID` and the region is `us-east-1`.
 6. `aws lambda update-function-code`, then `aws lambda wait function-updated-v2`.
 7. Read Lambda `State`, `LastUpdateStatus`, `Runtime`, `Handler`, and `LastModified` only. Do not print environment variables.
 8. `aws s3 sync frontend/dist/ s3://$S3_BUCKET_NAME/ --delete`.
@@ -99,7 +99,7 @@ Controlled recovery run:
 | Run URL | https://github.com/JosvierR/workshops-noticeboard-clean/actions/runs/37219116701 |
 | Event | `push` |
 | Conclusion | success |
-| AWS account | `279249498881` |
+| AWS account | `YOUR_AWS_ACCOUNT_ID` |
 | Region | `us-east-1` |
 | Lambda LastModified | `2026-10-04T17:04:52.000+0000` |
 | API smoke | PASS |
