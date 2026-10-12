@@ -233,7 +233,7 @@ Browser / HTTP client
 
 | Item | Value |
 | --- | --- |
-| AWS account ID | `279249498881` |
+| AWS account ID | `YOUR_AWS_ACCOUNT_ID` |
 | Region | `us-east-1` |
 | Lambda | NoticeBoardBackend |
 | Runtime | Python 3.12 |
@@ -277,8 +277,8 @@ Browser
 | Item | Value |
 | --- | --- |
 | Frontend | Amazon S3 static website |
-| Bucket | `noticeboard-josvier-279249498881-us-east-1` |
-| S3 website URL | `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com` |
+| Bucket | `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1` |
+| S3 website URL | `http://noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1.s3-website-us-east-1.amazonaws.com` |
 | Backend | API Gateway, Lambda, MongoDB Atlas |
 | API URL | `https://ybemxlautd.execute-api.us-east-1.amazonaws.com` |
 
