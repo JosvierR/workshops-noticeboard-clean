@@ -2,8 +2,8 @@ $ErrorActionPreference = "Stop"
 
 $profileName = if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { "becloudready" }
 $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
-$expectedAccount = "YOUR_AWS_ACCOUNT_ID"
-$bucket = "noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1"
+$expectedAccount = $env:EXPECTED_AWS_ACCOUNT
+$bucket = $env:S3_BUCKET_NAME
 $api = "https://ybemxlautd.execute-api.us-east-1.amazonaws.com"
 $originDomain = "$bucket.s3.$region.amazonaws.com"
 
