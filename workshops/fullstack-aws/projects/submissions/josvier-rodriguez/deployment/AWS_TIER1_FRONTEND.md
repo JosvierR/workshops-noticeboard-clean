@@ -6,15 +6,15 @@ Tier 1 used S3 static website hosting. Tier 3 superseded it with CloudFront, Ori
 
 | Item | Value |
 | --- | --- |
-| AWS account | `279249498881` |
+| AWS account | `YOUR_AWS_ACCOUNT_ID` |
 | AWS region | `us-east-1` |
-| Bucket | `noticeboard-josvier-279249498881-us-east-1` |
+| Bucket | `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1` |
 | Index document | `index.html` |
 | Error document | `index.html` |
-| Website endpoint | `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com` |
+| Website endpoint | `http://noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1.s3-website-us-east-1.amazonaws.com` |
 | API endpoint | `https://ybemxlautd.execute-api.us-east-1.amazonaws.com` |
 
-Public access is read-only. The bucket policy allows `s3:GetObject` on `arn:aws:s3:::noticeboard-josvier-279249498881-us-east-1/*`. It does not allow public write or delete. Public ACLs stay blocked.
+Public access is read-only. The bucket policy allows `s3:GetObject` on `arn:aws:s3:::noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1/*`. It does not allow public write or delete. Public ACLs stay blocked.
 
 ## CORS
 
@@ -22,7 +22,7 @@ API Gateway allows:
 
 - `http://localhost:5173`
 - `http://127.0.0.1:5173`
-- `http://noticeboard-josvier-279249498881-us-east-1.s3-website-us-east-1.amazonaws.com`
+- `http://noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1.s3-website-us-east-1.amazonaws.com`
 
 Methods: `GET`, `POST`, `PUT`, `DELETE`, `OPTIONS`.
 
@@ -54,7 +54,7 @@ The script runs `npm ci`, builds with `VITE_API_URL`, and syncs `frontend/dist/`
 Equivalent upload:
 
 ```powershell
-aws s3 sync frontend/dist s3://noticeboard-josvier-279249498881-us-east-1 --delete --profile becloudready
+aws s3 sync frontend/dist s3://noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1 --delete --profile becloudready
 ```
 
 The bucket root contains `index.html`, `favicon.ico`, and `assets/`. It does not contain a `dist/` prefix.
