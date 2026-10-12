@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $profileName = if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { "becloudready" }
 $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
-$expectedAccount = "YOUR_AWS_ACCOUNT_ID"
+$expectedAccount = $env:EXPECTED_AWS_ACCOUNT
 $functionName = "NoticeBoardBackend"
 $apiId = "ybemxlautd"
 $logGroup = "/aws/lambda/NoticeBoardBackend"
