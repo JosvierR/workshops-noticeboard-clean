@@ -6,7 +6,7 @@ if (-not $env:API_BASE_URL) {
 
 $profileName = if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { "becloudready" }
 $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
-$bucket = if ($env:BUCKET_NAME) { $env:BUCKET_NAME } else { "noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1" }
+$bucket = if ($env:BUCKET_NAME) { $env:BUCKET_NAME } else { throw "Set BUCKET_NAME before deploying" }
 $submission = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $frontend = Join-Path $submission "frontend"
 
