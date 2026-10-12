@@ -2,7 +2,7 @@ $ErrorActionPreference = "Stop"
 
 $profileName = if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { "becloudready" }
 $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
-$expectedAccount = "YOUR_AWS_ACCOUNT_ID"
+$expectedAccount = $env:EXPECTED_AWS_ACCOUNT
 $functionName = "NoticeBoardBackend"
 $apiId = "ybemxlautd"
 $logGroup = "/aws/lambda/NoticeBoardBackend"
@@ -11,7 +11,7 @@ $apiAlarm = "NoticeBoard-API-5xx"
 $dashboardName = "NoticeBoard-Operations"
 $api = "https://ybemxlautd.execute-api.us-east-1.amazonaws.com"
 $cloudfrontUrl = "https://d1s8syl3tltqh9.cloudfront.net"
-$bucket = "noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1"
+$bucket = $env:S3_BUCKET_NAME
 
 $account = aws sts get-caller-identity --profile $profileName --query Account --output text
 if ($account -ne $expectedAccount) { throw "Unexpected AWS account." }
