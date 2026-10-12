@@ -29,7 +29,7 @@ concurrency:
 
 env:
   PROJECT_DIR: workshops/fullstack-aws/projects/submissions/josvier-rodriguez
-  EXPECTED_AWS_ACCOUNT: "279249498881"
+  EXPECTED_AWS_ACCOUNT: "${{ vars.EXPECTED_AWS_ACCOUNT }}"
 
 jobs:
   quality:
