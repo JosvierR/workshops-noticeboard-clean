@@ -6,10 +6,10 @@ Tier 3 is the current production frontend. The browser loads the React app over 
 
 | Item | Value |
 | --- | --- |
-| AWS account | `279249498881` |
+| AWS account | `YOUR_AWS_ACCOUNT_ID` |
 | Region | `us-east-1` |
-| Bucket | `noticeboard-josvier-279249498881-us-east-1` |
-| S3 origin domain | `noticeboard-josvier-279249498881-us-east-1.s3.us-east-1.amazonaws.com` |
+| Bucket | `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1` |
+| S3 origin domain | `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1.s3.us-east-1.amazonaws.com` |
 | Distribution ID | `E3OKOFJWSNTBPB` |
 | CloudFront domain | `d1s8syl3tltqh9.cloudfront.net` |
 | CloudFront URL | `https://d1s8syl3tltqh9.cloudfront.net` |
@@ -26,7 +26,7 @@ The origin is the regional S3 REST endpoint. It is not the S3 website endpoint.
 
 ## Privacy
 
-S3 Block Public Access has all four settings enabled. The bucket policy allows `s3:GetObject` only for `cloudfront.amazonaws.com`, and only when `AWS:SourceArn` is `arn:aws:cloudfront::279249498881:distribution/E3OKOFJWSNTBPB`. There is no anonymous `Principal: "*"`.
+S3 Block Public Access has all four settings enabled. The bucket policy allows `s3:GetObject` only for `cloudfront.amazonaws.com`, and only when `AWS:SourceArn` is `arn:aws:cloudfront::YOUR_AWS_ACCOUNT_ID:distribution/E3OKOFJWSNTBPB`. There is no anonymous `Principal: "*"`.
 
 Anonymous `GET` of the REST object `/index.html` returns HTTP 403. CloudFront `/` returns HTTP 200. S3 static website hosting is disabled. Object ownership remains `BucketOwnerEnforced`.
 

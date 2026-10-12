@@ -2,8 +2,8 @@ $ErrorActionPreference = "Stop"
 
 $profileName = if ($env:AWS_PROFILE) { $env:AWS_PROFILE } else { "becloudready" }
 $region = if ($env:AWS_REGION) { $env:AWS_REGION } else { "us-east-1" }
-$expectedAccount = "279249498881"
-$bucket = "noticeboard-josvier-279249498881-us-east-1"
+$expectedAccount = $env:EXPECTED_AWS_ACCOUNT
+$bucket = $env:S3_BUCKET_NAME
 $apiId = "ybemxlautd"
 $oacName = "noticeboard-josvier-oac"
 $comment = "NoticeBoard Tier 3 - Josvier Rodriguez"

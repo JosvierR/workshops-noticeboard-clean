@@ -106,7 +106,7 @@ The production workflow verifies this after every deployment, without changing C
 - No AWS keys, MongoDB URIs, or private keys are tracked.
 - S3 is private. Block Public Access is enabled. Website hosting is off.
 - CORS allows the CloudFront origin and the two local Vite origins. The old S3 website origin is removed.
-- The deploy workflow refuses any account other than `279249498881`.
+- The deploy workflow refuses any account other than `YOUR_AWS_ACCOUNT_ID`.
 - CI does not modify the Lambda environment.
 
 ## Architecture

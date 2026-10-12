@@ -24,7 +24,7 @@ Docker Compose and FastAPI remain local development tools. This document describ
 
 | Item | Value |
 | --- | --- |
-| Account | `279249498881` |
+| Account | `YOUR_AWS_ACCOUNT_ID` |
 | Region | `us-east-1` |
 | Lambda | NoticeBoardBackend |
 | Runtime | Python 3.12 |
@@ -32,7 +32,7 @@ Docker Compose and FastAPI remain local development tools. This document describ
 | Handler | `lambda_function.lambda_handler` |
 | Memory | 256 MB |
 | Timeout | 10 seconds |
-| Role | `arn:aws:iam::279249498881:role/quicklabs-fullstack-aws-28sep-batch-a-lambda-exec` |
+| Role | `arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/quicklabs-fullstack-aws-28sep-batch-a-lambda-exec` |
 | API | NoticeBoardAPI |
 | API ID | `ybemxlautd` |
 | API type | HTTP API |

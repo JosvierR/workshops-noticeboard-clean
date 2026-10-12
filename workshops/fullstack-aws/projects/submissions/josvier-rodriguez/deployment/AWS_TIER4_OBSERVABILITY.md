@@ -4,7 +4,7 @@ Tier 4 is optional in the assignment and is complete. It adds logging retention,
 
 | Item | Value |
 | --- | --- |
-| AWS account | `279249498881` |
+| AWS account | `YOUR_AWS_ACCOUNT_ID` |
 | Region | `us-east-1` |
 | Lambda | `NoticeBoardBackend` |
 | API ID | `ybemxlautd` |

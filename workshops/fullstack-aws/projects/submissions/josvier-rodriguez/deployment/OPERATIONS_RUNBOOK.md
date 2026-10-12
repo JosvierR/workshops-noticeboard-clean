@@ -12,7 +12,7 @@ API: `https://ybemxlautd.execute-api.us-east-1.amazonaws.com`
 | --- | --- |
 | CloudFront | `E3OKOFJWSNTBPB` |
 | Origin Access Control | `noticeboard-josvier-oac` (`E2TFIV7Z74SWHH`) |
-| S3 | `noticeboard-josvier-279249498881-us-east-1` |
+| S3 | `noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1` |
 | API Gateway | `NoticeBoardAPI` (`ybemxlautd`) |
 | Lambda | `NoticeBoardBackend` |
 | CloudWatch log group | `/aws/lambda/NoticeBoardBackend` |

@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   group: noticeboard-tier2-deploy
@@ -29,7 +30,7 @@ concurrency:
 
 env:
   PROJECT_DIR: workshops/fullstack-aws/projects/submissions/josvier-rodriguez
-  EXPECTED_AWS_ACCOUNT: "279249498881"
+  EXPECTED_AWS_ACCOUNT: "${{ vars.EXPECTED_AWS_ACCOUNT }}"
 
 jobs:
   quality:
@@ -172,13 +173,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: noticeboard-github-deploy
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Guard AWS account and region
         run: |
           set -euo pipefail
+          test -n "$EXPECTED_AWS_ACCOUNT"
           test -n "$AWS_REGION"
           test -n "$LAMBDA_FUNCTION_NAME"
           test -n "$S3_BUCKET_NAME"
@@ -186,7 +188,6 @@ jobs:
           test -n "$CLOUDFRONT_DISTRIBUTION_ID"
           test -n "$CLOUDFRONT_URL"
           account="$(aws sts get-caller-identity --query Account --output text)"
-          echo "account=$account"
           echo "region=$AWS_REGION"
           if [ "$account" != "$EXPECTED_AWS_ACCOUNT" ]; then
             echo "Refusing to deploy outside the expected AWS account."

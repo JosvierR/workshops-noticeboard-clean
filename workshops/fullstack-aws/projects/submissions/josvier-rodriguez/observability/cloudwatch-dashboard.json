@@ -181,8 +181,8 @@
       "properties": {
         "title": "Alarm status",
         "alarms": [
-          "arn:aws:cloudwatch:us-east-1:279249498881:alarm:NoticeBoard-Lambda-Errors",
-          "arn:aws:cloudwatch:us-east-1:279249498881:alarm:NoticeBoard-API-5xx"
+          "arn:aws:cloudwatch:us-east-1:YOUR_AWS_ACCOUNT_ID:alarm:NoticeBoard-Lambda-Errors",
+          "arn:aws:cloudwatch:us-east-1:YOUR_AWS_ACCOUNT_ID:alarm:NoticeBoard-API-5xx"
         ]
       }
     },

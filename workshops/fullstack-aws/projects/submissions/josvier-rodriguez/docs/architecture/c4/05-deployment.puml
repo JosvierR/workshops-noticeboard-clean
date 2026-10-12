@@ -16,11 +16,11 @@ Deployment_Node(github, "GitHub", "JosvierR/workshops-noticeboard-clean") {
     }
 }
 
-Deployment_Node(aws, "AWS Account 279249498881", "Region us-east-1") {
+Deployment_Node(aws, "AWS Account YOUR_AWS_ACCOUNT_ID", "Region us-east-1") {
     Deployment_Node(cfnode, "CloudFront", "Distribution E3OKOFJWSNTBPB") {
         Container(cloudfront, "CDN", "CloudFront", "HTTPS and Origin Access Control.")
     }
-    Deployment_Node(s3node, "S3", "noticeboard-josvier-279249498881-us-east-1") {
+    Deployment_Node(s3node, "S3", "noticeboard-josvier-YOUR_AWS_ACCOUNT_ID-us-east-1") {
         Container(bucket, "Private bucket", "S3", "Frontend objects. Anonymous access denied.")
     }
     Deployment_Node(apinode, "API Gateway", "API ybemxlautd") {

@@ -146,7 +146,7 @@ Deployment_Node(github, "GitHub", "workshops-noticeboard-clean") {
         Container(workflow, "NoticeBoard deploy", "GitHub Actions", "tier2-ci-deploy")
     }
 }
-Deployment_Node(aws, "AWS 279249498881", "us-east-1") {
+Deployment_Node(aws, "AWS YOUR_AWS_ACCOUNT_ID", "us-east-1") {
     Deployment_Node(cfnode, "CloudFront", "E3OKOFJWSNTBPB") {
         Container(cloudfront, "CDN", "CloudFront", "HTTPS and OAC")
     }
